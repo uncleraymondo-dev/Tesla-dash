@@ -3,78 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tesla Phone Controller</title>
-  
+  <title>Tesla Remote</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
   <style>
-    body { background: #0f172a; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
-    h2 { margin-bottom: 20px; color: #00e5ff; }
+    :root {
+      --bg: #0b0d12;
+      --card-bg: rgba(22, 27, 38, 0.95);
+      --accent: #00e5ff;
+      --tesla-red: #e82127;
+      --text: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; text-align: center; }
+
+    h2 { font-weight: 800; letter-spacing: 1.5px; margin-bottom: 16px; color: var(--accent); }
     
-    .pin-input {
-      background: #1e293b; border: 2px solid #00e5ff; color: #fff; padding: 12px;
-      font-size: 22px; font-weight: bold; border-radius: 12px; text-align: center;
-      width: 160px; margin-bottom: 12px; font-family: monospace; letter-spacing: 2px;
+    .pin-box {
+      background: #161b26; border: 2px solid var(--accent); color: #fff; padding: 12px;
+      font-size: 24px; font-weight: bold; border-radius: 14px; text-align: center; width: 140px;
+      font-family: monospace; letter-spacing: 4px; outline: none; margin-bottom: 10px;
     }
 
+    .status-badge { background: #3b0764; color: #d8b4fe; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 16px; }
+    .status-badge.connected { background: #064e3b; color: #6ee7b7; }
+
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+    
     .btn {
-      background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #fff;
-      padding: 16px; font-size: 16px; font-weight: bold; border-radius: 14px;
-      margin: 8px 0; width: 100%; cursor: pointer;
+      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); color: #fff;
+      padding: 18px 12px; font-size: 14px; font-weight: 700; border-radius: 14px; display: flex;
+      flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
     }
-    .btn:active { background: #00e5ff; color: #000; }
-    .status-badge { background: #991b1b; color: #f87171; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+    .btn:active { background: var(--accent); color: #000; }
+    .btn-full { grid-column: span 2; background: #1e293b; }
+    .btn-home { grid-column: span 2; background: var(--tesla-red); }
   </style>
 </head>
 <body>
 
-  <h2>Tesla Controller</h2>
-  
-  <div>
-    <input id="pinInput" class="pin-input" type="number" placeholder="PIN" maxlength="4" />
-    <br>
-    <button class="btn" style="background:#007aff; width:160px;" onclick="connectToCar()">Connect</button>
-  </div>
-  <br>
+  <h2>TESLA REMOTE</h2>
 
+  <input id="pin" class="pin-box" type="number" placeholder="PIN" maxlength="4" />
+  <br>
+  <button class="btn btn-full" style="padding:10px; background:#007aff;" onclick="connect()">Pair via Hotspot</button>
+  <br>
   <div id="status" class="status-badge">Not Connected</div>
 
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://www.youtube.com')">▶️ Launch YouTube</button>
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://twitch.tv')">👾 Launch Twitch</button>
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://play.2048.co')">🎮 Launch Game 2048</button>
-  <button class="btn" onclick="sendAction('GO_HOME', '')" style="background: #991b1b;">🏠 Return to Home</button>
+  <div class="grid">
+    <div class="btn" onclick="send('LAUNCH', 'https://www.youtube.com')"><span>▶️</span>YouTube</div>
+    <div class="btn" onclick="send('LAUNCH', 'https://www.netflix.com')"><span>🎬</span>Netflix</div>
+    <div class="btn" onclick="send('LAUNCH', 'https://www.primevideo.com')"><span>📦</span>Prime Video</div>
+    <div class="btn" onclick="send('LAUNCH', 'https://www.disneyplus.com')"><span>✨</span>Disney+</div>
+    <div class="btn" onclick="send('LAUNCH', 'https://www.twitch.tv')"><span>👾</span>Twitch</div>
+    <div class="btn" onclick="send('LAUNCH', 'https://open.spotify.com')"><span>🎵</span>Spotify</div>
+    
+    <div class="btn btn-full" onclick="send('FULLSCREEN', '')" style="background:#0284c7;">🖥️ Expand Fullscreen Mode</div>
+    <div class="btn btn-home" onclick="send('HOME', '')">🏠 Return to Dashboard Grid</div>
+  </div>
 
   <script>
     const peer = new Peer();
     let conn = null;
 
-    function connectToCar() {
-      const pin = document.getElementById('pinInput').value;
-      if (!pin) return alert("Enter the PIN shown on your Tesla screen");
+    function connect() {
+      const pinVal = document.getElementById('pin').value;
+      if (!pinVal) return alert("Enter the 4-digit PIN on screen");
 
-      const targetPeerId = 'tesla-mcu2-' + pin;
-      conn = peer.connect(targetPeerId);
+      conn = peer.connect('tesladash-' + pinVal);
 
       conn.on('open', () => {
         const badge = document.getElementById('status');
-        badge.innerText = 'Paired with Tesla!';
-        badge.style.background = '#065f46';
-        badge.style.color = '#34d399';
+        badge.innerText = 'Connected via Hotspot!';
+        badge.classList.add('connected');
       });
 
       conn.on('close', () => {
         const badge = document.getElementById('status');
         badge.innerText = 'Disconnected';
-        badge.style.background = '#991b1b';
-        badge.style.color = '#f87171';
+        badge.classList.remove('connected');
       });
     }
 
-    function sendAction(type, url) {
+    function send(type, url) {
       if (conn && conn.open) {
         conn.send({ type, url });
       } else {
-        alert("Connect using the 4-digit Tesla PIN first!");
+        alert("Enter PIN and tap Pair first!");
       }
     }
   </script>
