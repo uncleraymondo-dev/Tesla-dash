@@ -3,98 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tesla Remote Receiver</title>
-
-  <!-- PeerJS Engine (Free WebRTC Data Connection) -->
+  <title>Tesla Model X Dashboard</title>
+  
+  <!-- PeerJS for Instant Hotspot Remote Control -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
   <style>
+    :root {
+      --bg-dark: #0b0d12;
+      --card-bg: rgba(22, 27, 38, 0.75);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --accent-blue: #00e5ff;
+      --tesla-red: #e82127;
+      --text-main: #f4f4f4;
+      --text-sub: #8e8e8e;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: #0b0e14; font-family: -apple-system, sans-serif; color: #fff; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main); }
 
-    .dashboard { display: flex; flex-direction: column; width: 100%; height: 100%; }
-    
-    .header {
-      height: 70px; background: rgba(18, 24, 38, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    /* Model X Vector Artwork Overlay */
+    .bg-modelx {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.12;
+      background: radial-gradient(circle at center, rgba(0, 229, 255, 0.15) 0%, transparent 70%),
+                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
+      filter: grayscale(100%) contrast(120%);
     }
-    .brand { font-size: 22px; font-weight: 800; color: #00e5ff; }
-    .pin-badge { font-size: 18px; font-weight: 800; background: #1e293b; padding: 6px 14px; border-radius: 10px; color: #34c759; font-family: monospace; }
 
-    .content-area { flex: 1; position: relative; overflow: hidden; }
-    
-    .grid {
-      position: absolute; inset: 0; padding: 30px; display: grid;
-      grid-template-columns: repeat(3, 1fr); gap: 20px; align-content: center;
-    }
-    .card {
-      background: rgba(22, 30, 46, 0.95); border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 18px; height: 120px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 16px;
-      cursor: pointer;
-    }
-    .card span { font-size: 32px; }
+    .app-container { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
 
-    #activeFrame { width: 100%; height: 100%; border: none; display: none; background: #000; }
+    /* Tesla Glass HUD Header */
+    .hud-header {
+      height: 75px; padding: 0 32px; background: rgba(15, 20, 30, 0.85);
+      border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(16px);
+    }
+    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: 2px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+    .brand-title span { color: var(--tesla-red); font-size: 24px; }
+
+    .status-pill {
+      background: rgba(30, 41, 59, 0.8); border: 1px solid var(--card-border);
+      padding: 8px 18px; border-radius: 20px; font-family: monospace; font-size: 15px; font-weight: 700; color: var(--accent-blue);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; }
+    .status-dot.active { background: #34c759; box-shadow: 0 0 10px #34c759; }
+
+    /* Grid Area */
+    .main-viewport { flex: 1; padding: 24px 32px; overflow-y: auto; position: relative; }
+    .app-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 20px; max-width: 1200px; margin: 0 auto;
+    }
+
+    /* Tesla App Cards */
+    .app-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+      height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; cursor: pointer; transition: transform 0.15s, background 0.2s, border-color 0.2s;
+      backdrop-filter: blur(10px);
+    }
+    .app-card:active { transform: scale(0.96); background: rgba(0, 229, 255, 0.15); border-color: var(--accent-blue); }
+    .app-card svg, .app-card img, .app-card .icon-emoji { width: 44px; height: 44px; font-size: 40px; object-fit: contain; }
+    .app-card span.title { font-size: 14px; font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; }
+
+    /* Active Launch Iframe */
+    #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; border-radius: 12px; }
   </style>
 </head>
 <body>
 
-  <div class="dashboard">
-    <div class="header">
-      <div class="brand">TESLA DASH PORTAL</div>
-      <div class="pin-badge">PAIR PIN: <span id="carPin">Generating...</span></div>
+  <div class="bg-modelx"></div>
+
+  <div class="app-container">
+    <div class="hud-header">
+      <div class="brand-title"><span>T</span> MODEL X PORTAL</div>
+      <div class="status-pill">
+        <div id="dot" class="status-dot"></div>
+        <span>PIN: <span id="pinDisplay">----</span></span>
+      </div>
     </div>
 
-    <div class="content-area">
-      <!-- Dashboard App Grid -->
-      <div id="appGrid" class="grid">
-        <div class="card" onclick="launchApp('https://www.youtube.com')"><span>▶️</span>YouTube</div>
-        <div class="card" onclick="launchApp('https://twitch.tv')"><span>👾</span>Twitch</div>
-        <div class="card" onclick="launchApp('https://play.2048.co')"><span>🎮</span>Game 2048</div>
+    <div class="main-viewport">
+      <div id="appGrid" class="app-grid">
+        <!-- Streaming Apps -->
+        <div class="app-card" onclick="launchApp('https://www.youtube.com')">
+          <span class="icon-emoji">▶️</span>
+          <span class="title">YouTube</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://www.netflix.com')">
+          <span class="icon-emoji">🎬</span>
+          <span class="title">Netflix</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://www.primevideo.com')">
+          <span class="icon-emoji">📦</span>
+          <span class="title">Prime Video</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://www.disneyplus.com')">
+          <span class="icon-emoji">✨</span>
+          <span class="title">Disney+</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://www.twitch.tv')">
+          <span class="icon-emoji">👾</span>
+          <span class="title">Twitch</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://app.plex.tv')">
+          <span class="icon-emoji">🍿</span>
+          <span class="title">Plex</span>
+        </div>
+        <!-- Audio & Games -->
+        <div class="app-card" onclick="launchApp('https://open.spotify.com')">
+          <span class="icon-emoji">🎵</span>
+          <span class="title">Spotify</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://music.apple.com')">
+          <span class="icon-emoji">🍎</span>
+          <span class="title">Apple Music</span>
+        </div>
+        <div class="app-card" onclick="launchApp('https://play.2048.co')">
+          <span class="icon-emoji">🎮</span>
+          <span class="title">Game 2048</span>
+        </div>
       </div>
 
-      <!-- Remote Stream Viewport -->
-      <iframe id="activeFrame"></iframe>
+      <iframe id="contentFrame"></iframe>
     </div>
   </div>
 
   <script>
-    // Generate a random 4-digit room code (e.g. 8492)
+    // Generate constant 4-Digit Local Hotspot Pin
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const peerId = 'tesla-mcu2-' + pin;
-    
-    document.getElementById('carPin').innerText = pin;
+    const peerId = 'tesladash-' + pin;
+    document.getElementById('pinDisplay').innerText = pin;
 
-    // Connect to PeerJS Free Public Server
-    const peer = new Peer(peerId);
+    const peer = new Peer(peerId, {
+      config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+    });
 
-    peer.on('open', (id) => {
-      console.log('Tesla Car Peer Ready:', id);
+    peer.on('open', () => {
+      console.log('Tesla Dashboard Ready');
     });
 
     peer.on('connection', (conn) => {
+      document.getElementById('dot').classList.add('active');
+      
       conn.on('data', (data) => {
-        if (data.type === 'LOAD_URL') {
-          launchApp(data.url);
-        } else if (data.type === 'GO_HOME') {
-          closeApp();
-        }
+        if (data.type === 'LAUNCH') launchApp(data.url);
+        if (data.type === 'HOME') closeApp();
+        if (data.type === 'FULLSCREEN') triggerFullscreen(data.url);
+      });
+
+      conn.on('close', () => {
+        document.getElementById('dot').classList.remove('active');
       });
     });
 
     function launchApp(url) {
       document.getElementById('appGrid').style.display = 'none';
-      const frame = document.getElementById('activeFrame');
+      const frame = document.getElementById('contentFrame');
       frame.style.display = 'block';
       frame.src = url;
     }
 
     function closeApp() {
-      const frame = document.getElementById('activeFrame');
+      const frame = document.getElementById('contentFrame');
       frame.src = '';
       frame.style.display = 'none';
       document.getElementById('appGrid').style.display = 'grid';
+    }
+
+    function triggerFullscreen(targetUrl) {
+      const encoded = encodeURIComponent(targetUrl || window.location.href);
+      window.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
     }
   </script>
 </body>
