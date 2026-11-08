@@ -3,36 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tesla Quick Launcher</title>
+  <title>Tesla Controller</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <style>
-    body { background: #0f172a; color: #fff; font-family: -apple-system, sans-serif; padding: 24px; text-align: center; }
-    h2 { color: #00e5ff; margin-bottom: 8px; font-size: 22px; }
-    p { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
-    .btn {
-      background: #1e293b; border: 1px solid rgba(255,255,255,0.12); color: #fff;
-      padding: 18px; font-size: 16px; font-weight: 700; border-radius: 14px;
-      margin: 10px 0; width: 100%; display: flex; align-items: center; justify-content: center;
-      gap: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    body { background: #0f172a; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
+    h2 { margin-bottom: 20px; color: #00e5ff; }
+    .btn { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border-radius: 14px; margin: 10px 0; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
     .btn:active { background: #00e5ff; color: #000; }
+    .status-badge { background: #065f46; color: #34d399; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
-  <h2>Tesla Quick Launcher</h2>
-  <p>Tap an app to instantly load it on your car screen:</p>
+  <h2>Tesla Remote Controller</h2>
+  <div id="status" class="status-badge">Connecting to Car...</div>
 
-  <button class="btn" onclick="openCarApp('youtube')">▶️ Open YouTube in Car</button>
-  <button class="btn" onclick="openCarApp('twitch')">👾 Open Twitch in Car</button>
-  <button class="btn" onclick="openCarApp('game')">🎮 Open Game in Car</button>
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://www.youtube.com')">▶️ Launch YouTube in Car</button>
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://twitch.tv')">👾 Launch Twitch in Car</button>
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://play.2048.co')">🎮 Launch Game on Screen</button>
+  <button class="btn" onclick="sendAction('GO_HOME', '')" style="background: #991b1b;">🏠 Return to Dashboard Grid</button>
 
   <script>
-    // Automatically points to your repository's live GitHub Pages URL
-    const baseUrl = "https://uncleraymondo-dev.github.io/tesla-codriver/";
+    const ROOM_CODE = 'tesla-modelx-mcu2-alpha';
+    const socket = io('https://socket-io-chatема-example.herokuapp.com' || 'https://cluster-socket.herokuapp.com', {
+      transports: ['websocket', 'polling']
+    });
 
-    function openCarApp(appName) {
-      // Navigates your Tesla browser via the link parameter
-      window.location.href = `${baseUrl}?app=${appName}`;
+    socket.on('connect', () => {
+      document.getElementById('status').innerText = 'Connected to Tesla Model X';
+      socket.emit('join', ROOM_CODE);
+    });
+
+    socket.on('disconnect', () => {
+      document.getElementById('status').innerText = 'Disconnected';
+      document.getElementById('status').style.background = '#991b1b';
+      document.getElementById('status').style.color = '#f87171';
+    });
+
+    function sendAction(type, url) {
+      socket.emit('remote-action', { room: ROOM_CODE, type, url });
     }
   </script>
 </body>
