@@ -11,102 +11,99 @@
   <style>
     :root {
       --bg-light: #f4f6f9;
-      --card-bg-transparent: rgba(255, 255, 255, 0.3); /* 70% Transparent Glass Bubble */
-      --card-border: rgba(255, 255, 255, 0.6);
-      --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-      --text-dark: #0f172a;
+      --card-bg-transparent: rgba(255, 255, 255, 0.1); /* 90% Transparency Glass Bubble */
+      --card-border: rgba(255, 255, 255, 0.25);
+      --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+      --text-dark: #ffffff;
       --cherry-red: #d90429;
-      --accent-blue: #0284c7;
+      --accent-blue: #00e5ff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     
-    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-light); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-dark); }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #0b0d12; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-dark); }
 
     .portal-vertical-wrapper { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
     /* HUD Header Bar with Official Tesla SVG Logo */
     .hud-header {
-      height: 65px; padding: 0 20px; background: rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between;
+      height: 65px; padding: 0 20px; background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;
       backdrop-filter: blur(16px); z-index: 10; position: relative;
     }
     
-    .brand-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
-    
-    /* Tesla SVG Icon */
-    .tesla-logo { width: 22px; height: 22px; fill: var(--cherry-red); }
+    .brand-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .tesla-logo { width: 20px; height: 20px; fill: var(--cherry-red); }
 
     .status-pill {
-      background: #ffffff; border: 1px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
       padding: 5px 12px; border-radius: 20px; font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent-blue);
-      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: flex; align-items: center; gap: 8px;
     }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    /* Fixed Background Hero: Model X R9 HOA with Maxton Bodykit & Plaid Puddle Light */
+    /* Fixed Background Hero: White Model X R9 HOA with Maxton Bodykit & Plaid Puddle Light */
     .car-hero-stage {
       position: absolute; top: 65px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, rgba(244, 246, 249, 0.95) 100%),
-                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 25%/cover no-repeat;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(11, 13, 18, 0.95) 100%),
+                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 30%/cover no-repeat;
     }
 
-    /* Maxton Front Splitter & Badge Glow Simulation */
+    /* Illuminated Front 'T' Badge Glow */
     .badge-glow {
-      position: absolute; top: 38%; left: 38%; width: 14px; height: 14px; border-radius: 50%;
+      position: absolute; top: 37%; left: 38%; width: 12px; height: 12px; border-radius: 50%;
       background: #ffffff; box-shadow: 0 0 16px 6px rgba(255, 255, 255, 0.95); pointer-events: none;
     }
 
-    /* Plaid Tunnel Puddle Light Beam Projection */
+    /* Colorful Plaid Warp-Speed Tunnel Puddle Light Projection Beam */
     .plaid-puddle-projection {
-      position: absolute; top: 46%; left: 45%; width: 220px; height: 90px;
+      position: absolute; top: 45%; left: 44%; width: 210px; height: 85px;
       transform: skewX(-32deg) rotateX(55deg);
       background: 
-        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 22%, transparent 22%),
-        repeating-linear-gradient(45deg, #d90429, #d90429 5px, #ffffff 5px, #ffffff 10px, #000000 10px, #000000 15px);
-      box-shadow: 0 0 35px rgba(217, 4, 41, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.95);
-      border: 2px solid #ffffff; opacity: 0.92; border-radius: 4px; pointer-events: none;
+        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
+        repeating-linear-gradient(45deg, #d90429, #d90429 4px, #ffffff 4px, #ffffff 8px, #000000 8px, #000000 12px);
+      box-shadow: 0 0 30px rgba(217, 4, 41, 0.95), inset 0 0 10px rgba(255, 255, 255, 0.9);
+      border: 2px solid #ffffff; opacity: 0.95; border-radius: 4px; pointer-events: none;
     }
 
     .license-plate-tag {
-      position: absolute; top: 48%; left: 34%; background: #ffffff; color: #000;
-      border: 1px solid #000; padding: 2px 7px; font-family: monospace; font-size: 10px; font-weight: 900;
-      border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      position: absolute; top: 47%; left: 34%; background: #ffffff; color: #000;
+      border: 1px solid #000; padding: 1px 6px; font-family: monospace; font-size: 10px; font-weight: 900;
+      border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
 
     /* Scrollable App Shelf Container (Overlays Car Stage) */
     .app-shelf-overlay {
       position: relative; z-index: 5; flex: 1; margin-top: 65px;
-      overflow-y: auto; padding: 260px 20px 40px 20px;
-      scroll-behavior: smooth;
+      overflow-y: auto; padding: 250px 20px 40px 20px;
     }
 
-    /* 3D Transparent Floating Bubble Cards (70% Transparency) */
+    /* 3D Transparent 90% Floating Bubble Cards */
     .app-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 900px; margin: 0 auto;
     }
 
     .app-card {
       background: var(--card-bg-transparent);
       border: 1px solid var(--card-border);
-      border-radius: 24px; height: 120px;
+      border-radius: 22px; height: 115px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; cursor: pointer;
-      backdrop-filter: blur(12px) saturate(160%);
-      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      gap: 6px; cursor: pointer;
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
       box-shadow: var(--card-shadow);
       transition: transform 0.15s ease, background 0.15s ease;
     }
 
     .app-card:active {
       transform: scale(0.95);
-      background: rgba(217, 4, 41, 0.25);
+      background: rgba(217, 4, 41, 0.35);
       border-color: var(--cherry-red);
     }
 
-    .app-card .icon-emoji { font-size: 36px; }
-    .app-card span.title { font-size: 13px; font-weight: 800; color: var(--text-dark); text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+    .app-card .icon-emoji { font-size: 34px; }
+    .app-card span.title { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
 
     /* Remote Active Fullscreen View */
     #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; z-index: 20; position: absolute; inset: 0; }
@@ -118,7 +115,6 @@
     <!-- HUD Header with Tesla Icon -->
     <div class="hud-header">
       <div class="brand-title">
-        <!-- Official Tesla Logo SVG -->
         <svg class="tesla-logo" viewBox="0 0 342 342">
           <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
         </svg>
@@ -131,7 +127,7 @@
       </div>
     </div>
 
-    <!-- Background Stage (Stays Fixed Behind Floating Bubbles) -->
+    <!-- Background Stage: Model X White with Maxton Kit & Plaid Puddle Lights -->
     <div class="car-hero-stage">
       <div class="badge-glow"></div>
       <div class="license-plate-tag">R9 HOA</div>
@@ -175,5 +171,49 @@
   </div>
 
   <script>
-    // Always generate a fresh 4-digit PIN on page load for clean MQTT handshakes
-    const
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById('pinDisplay').innerText = pin;
+
+    // Connect to EMQX Public WebSocket Broker (Port 8084)
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+    const topic = 'cherry_portal_' + pin;
+
+    client.on('connect', () => {
+      document.getElementById('dot').classList.add('active');
+      client.subscribe(topic);
+    });
+
+    client.on('message', (t, message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        if (data.type === 'LAUNCH') launchApp(data.url);
+        if (data.type === 'HOME') closeApp();
+        if (data.type === 'FULLSCREEN') triggerFullscreen(data.url);
+      } catch(e) {}
+    });
+
+    client.on('offline', () => {
+      document.getElementById('dot').classList.remove('active');
+    });
+
+    function launchApp(url) {
+      document.getElementById('appGrid').style.display = 'none';
+      const frame = document.getElementById('contentFrame');
+      frame.style.display = 'block';
+      frame.src = url;
+    }
+
+    function closeApp() {
+      const frame = document.getElementById('contentFrame');
+      frame.src = '';
+      frame.style.display = 'none';
+      document.getElementById('appGrid').style.display = 'grid';
+    }
+
+    function triggerFullscreen(targetUrl) {
+      const encoded = encodeURIComponent(targetUrl || window.location.href);
+      window.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
+    }
+  </script>
+</body>
+</html>
