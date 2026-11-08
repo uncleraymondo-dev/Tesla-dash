@@ -7,10 +7,10 @@
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
-      --bg: #f4f6f9;
-      --card-bg: #ffffff;
+      --bg: #0f172a;
+      --card-bg: rgba(255, 255, 255, 0.08);
       --cherry-red: #d90429;
-      --text: #0f172a;
+      --text: #ffffff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; text-align: center; }
@@ -18,20 +18,20 @@
     h2 { font-weight: 800; letter-spacing: 1px; margin-bottom: 14px; color: var(--cherry-red); }
     
     .pin-box {
-      background: #ffffff; border: 2px solid var(--cherry-red); color: #111; padding: 10px;
+      background: #1e293b; border: 2px solid var(--cherry-red); color: #fff; padding: 10px;
       font-size: 24px; font-weight: bold; border-radius: 12px; text-align: center; width: 140px;
       font-family: monospace; letter-spacing: 4px; outline: none; margin-bottom: 10px;
     }
 
-    .status-badge { background: #fee2e2; color: #991b1b; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; margin-bottom: 16px; }
-    .status-badge.connected { background: #d1fae5; color: #065f46; }
+    .status-badge { background: #7f1d1d; color: #fca5a5; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; margin-bottom: 16px; }
+    .status-badge.connected { background: #064e3b; color: #6ee7b7; }
 
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
     
     .btn {
-      background: var(--card-bg); border: 1px solid rgba(0,0,0,0.08); color: var(--text);
+      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); color: var(--text);
       padding: 16px 10px; font-size: 14px; font-weight: 700; border-radius: 14px; display: flex;
-      flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .btn:active { background: var(--cherry-red); color: #fff; }
     .btn-full { grid-column: span 2; background: #0284c7; color: #fff; }
