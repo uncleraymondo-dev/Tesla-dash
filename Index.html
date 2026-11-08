@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tesla Remote Receiver</title>
+  
+  <!-- Socket.io for real-time remote commands -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #0b0e14; font-family: -apple-system, sans-serif; color: #fff; }
+
+    /* Main Dashboard Layout */
+    .dashboard { display: flex; flex-direction: column; width: 100%; height: 100%; }
+    
+    .header {
+      height: 70px; background: rgba(18, 24, 38, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    }
+    .brand { font-size: 22px; font-weight: 800; color: #00e5ff; }
+    .status { font-size: 14px; color: #34c759; font-weight: 600; }
+
+    /* Content Area (App Grid or Active Stream/Iframe) */
+    .content-area { flex: 1; position: relative; overflow: hidden; }
+    
+    .grid {
+      position: absolute; inset: 0; padding: 30px; display: grid;
+      grid-template-columns: repeat(3, 1fr); gap: 20px; align-content: center;
+    }
+    .card {
+      background: rgba(22, 30, 46, 0.95); border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px; height: 120px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 16px;
+    }
+    .card span { font-size: 32px; }
+
+    /* Active Remote Iframe / Player */
+    #activeFrame { width: 100%; height: 100%; border: none; display: none; background: #000; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+    <div class="header">
+      <div class="brand">TESLA DASH PORTAL</div>
+      <div id="connectionStatus" class="status">Connecting to Remote...</div>
+    </div>
+
+    <div class="content-area">
+      <!-- Default App Launcher Grid -->
+      <div id="appGrid" class="grid">
+        <div class="card" onclick="launchApp('https://www.youtube.com')"><span>▶️</span>YouTube</div>
+        <div class="card" onclick="launchApp('https://twitch.tv')"><span>👾</span>Twitch</div>
+        <div class="card" onclick="launchApp('https://play.2048.co')"><span>🎮</span>Game 2048</div>
+      </div>
+
+      <!-- Remote Controlled Iframe View -->
+      <iframe id="activeFrame"></iframe>
+    </div>
+  </div>
+
+  <script>
+    // Connect to a free public signaling/relay namespace
+    // Replace 'your-unique-room-name' with a custom secret key matching your phone controller
+    const ROOM_CODE = 'tesla-modelx-mcu2-alpha';
+    
+    // Using a public socket test server for zero hosting costs
+    const socket = io('https://socket-io-chatема-example.herokuapp.com' || 'https://cluster-socket.herokuapp.com', {
+      transports: ['websocket', 'polling']
+    });
+
+    socket.on('connect', () => {
+      document.getElementById('connectionStatus').innerText = 'Connected (Ready)';
+      socket.emit('join', ROOM_CODE);
+    });
+
+    socket.on('disconnect', () => {
+      document.getElementById('connectionStatus').innerText = 'Disconnected';
+      document.getElementById('connectionStatus').style.color = '#ff3b30';
+    });
+
+    // Listen for remote commands sent from your Android phone
+    socket.on('remote-action', (action) => {
+      if (action.type === 'LOAD_URL') {
+        launchApp(action.url);
+      } else if (action.type === 'GO_HOME') {
+        closeApp();
+      }
+    });
+
+    function launchApp(url) {
+      document.getElementById('appGrid').style.display = 'none';
+      const frame = document.getElementById('activeFrame');
+      frame.style.display = 'block';
+      frame.src = url;
+    }
+
+    function closeApp() {
+      const frame = document.getElementById('activeFrame');
+      frame.src = '';
+      frame.style.display = 'none';
+      document.getElementById('appGrid').style.display = 'grid';
+    }
+  </script>
+</body>
+</html>
