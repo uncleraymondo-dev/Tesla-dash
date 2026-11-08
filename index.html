@@ -40,36 +40,24 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
-    /* Photo Realistic White Model X Hero Stage with Maxton Kit & Plaid Light */
+    /* Exact Model X Photo Background with Maxton Kit & Plaid Puddle Lights */
     .car-hero-stage {
       position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
       background: 
-        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.2) 0%, rgba(7, 9, 14, 0.95) 85%),
-        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 25%/cover no-repeat;
+        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.15) 0%, rgba(7, 9, 14, 0.95) 85%),
+        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 28%/cover no-repeat;
     }
 
-    /* Illuminated Tesla 'T' Front Badge */
-    .badge-halo {
-      position: absolute; top: 35%; left: 37.5%; width: 14px; height: 14px; border-radius: 50%;
-      background: #ffffff; box-shadow: 0 0 18px 8px rgba(255, 255, 255, 0.95); pointer-events: none;
-    }
-
-    /* Maxton Front Splitter & Side Skirt Shadow Accent */
-    .maxton-splitter-accent {
-      position: absolute; top: 48%; left: 24%; width: 42%; height: 8px;
-      background: #000000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9); border-radius: 4px; pointer-events: none;
-    }
-
-    /* Custom R9 HOA Registration Plate Overlay */
+    /* Custom R9 HOA Registration Plate Overlay matching reference layout */
     .license-plate-tag {
-      position: absolute; top: 47%; left: 34%; background: #ffffff; color: #000000;
+      position: absolute; top: 54%; left: 32%; background: #ffffff; color: #000000;
       border: 1.5px solid #000000; padding: 1px 7px; font-family: monospace; font-size: 11px; font-weight: 900;
       border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 1px; z-index: 3;
     }
 
-    /* Plaid Warp-Speed Tunnel Puddle Light Projection Beam */
+    /* Multi-coloured Plaid Warp-Speed Tunnel Puddle Light Projection Beam */
     .plaid-puddle-projection {
-      position: absolute; top: 44%; left: 44%; width: 220px; height: 90px;
+      position: absolute; top: 48%; left: 45%; width: 210px; height: 85px;
       transform: skewX(-32deg) rotateX(55deg);
       background: 
         radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
@@ -109,113 +97,13 @@
     .app-card .icon-emoji { font-size: 32px; }
     .app-card span.title { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
 
-    /* Active Launch Iframe */
     #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; z-index: 20; position: absolute; inset: 0; }
   </style>
 </head>
 <body>
 
   <div class="portal-container">
-    <!-- Header -->
     <div class="hud-header">
       <div class="brand-title">
         <svg class="tesla-logo" viewBox="0 0 342 342">
-          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
-        </svg>
-        CHERRY BERRY MAGIC CARPET PORTAL
-      </div>
-
-      <div class="status-pill">
-        <div id="dot" class="status-dot"></div>
-        <span>PIN: <span id="pinDisplay">----</span></span>
-      </div>
-    </div>
-
-    <!-- White Model X Hero Stage -->
-    <div class="car-hero-stage">
-      <div class="badge-halo"></div>
-      <div class="maxton-splitter-accent"></div>
-      <div class="license-plate-tag">R9 HOA</div>
-      <div class="plaid-puddle-projection"></div>
-    </div>
-
-    <!-- 95% Transparent Glass Grid Overlay -->
-    <div class="app-shelf-overlay">
-      <div id="appGrid" class="app-grid">
-        <div class="app-card" onclick="launchApp('https://www.youtube.com')">
-          <span class="icon-emoji">▶️</span><span class="title">YouTube</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.netflix.com')">
-          <span class="icon-emoji">🎬</span><span class="title">Netflix</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.primevideo.com')">
-          <span class="icon-emoji">📦</span><span class="title">Prime Video</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.disneyplus.com')">
-          <span class="icon-emoji">✨</span><span class="title">Disney+</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.twitch.tv')">
-          <span class="icon-emoji">👾</span><span class="title">Twitch</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://app.plex.tv')">
-          <span class="icon-emoji">🍿</span><span class="title">Plex</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://open.spotify.com')">
-          <span class="icon-emoji">🎵</span><span class="title">Spotify</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://music.apple.com')">
-          <span class="icon-emoji">🍎</span><span class="title">Apple Music</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://play.2048.co')">
-          <span class="icon-emoji">🎮</span><span class="title">Game 2048</span>
-        </div>
-      </div>
-    </div>
-
-    <iframe id="contentFrame"></iframe>
-  </div>
-
-  <script>
-    const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    document.getElementById('pinDisplay').innerText = pin;
-
-    // Connect via EMQX Secure WebSocket
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
-    const topic = 'cherry_portal_' + pin;
-
-    client.on('connect', () => {
-      document.getElementById('dot').classList.add('active');
-      client.subscribe(topic);
-    });
-
-    client.on('message', (t, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        if (data.type === 'LAUNCH') launchApp(data.url);
-        if (data.type === 'HOME') closeApp();
-        if (data.type === 'FULLSCREEN') triggerFullscreen(data.url);
-      } catch(e) {}
-    });
-
-    client.on('offline', () => {
-      document.getElementById('dot').classList.remove('active');
-    });
-
-    function launchApp(targetUrl) {
-      triggerFullscreen(targetUrl);
-    }
-
-    function closeApp() {
-      const frame = document.getElementById('contentFrame');
-      frame.src = '';
-      frame.style.display = 'none';
-      document.getElementById('appGrid').style.display = 'grid';
-    }
-
-    function triggerFullscreen(targetUrl) {
-      const encoded = encodeURIComponent(targetUrl || 'https://www.youtube.com');
-      window.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
-    }
-  </script>
-</body>
-</html>
+          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-
