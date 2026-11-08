@@ -4,15 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tesla Remote Receiver</title>
-  
-  <!-- Socket.io for real-time remote commands -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <!-- PeerJS Engine (Free WebRTC Data Connection) -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #0b0e14; font-family: -apple-system, sans-serif; color: #fff; }
 
-    /* Main Dashboard Layout */
     .dashboard { display: flex; flex-direction: column; width: 100%; height: 100%; }
     
     .header {
@@ -20,9 +19,8 @@
       display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
     }
     .brand { font-size: 22px; font-weight: 800; color: #00e5ff; }
-    .status { font-size: 14px; color: #34c759; font-weight: 600; }
+    .pin-badge { font-size: 18px; font-weight: 800; background: #1e293b; padding: 6px 14px; border-radius: 10px; color: #34c759; font-family: monospace; }
 
-    /* Content Area (App Grid or Active Stream/Iframe) */
     .content-area { flex: 1; position: relative; overflow: hidden; }
     
     .grid {
@@ -33,10 +31,10 @@
       background: rgba(22, 30, 46, 0.95); border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 18px; height: 120px; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 16px;
+      cursor: pointer;
     }
     .card span { font-size: 32px; }
 
-    /* Active Remote Iframe / Player */
     #activeFrame { width: 100%; height: 100%; border: none; display: none; background: #000; }
   </style>
 </head>
@@ -45,49 +43,44 @@
   <div class="dashboard">
     <div class="header">
       <div class="brand">TESLA DASH PORTAL</div>
-      <div id="connectionStatus" class="status">Connecting to Remote...</div>
+      <div class="pin-badge">PAIR PIN: <span id="carPin">Generating...</span></div>
     </div>
 
     <div class="content-area">
-      <!-- Default App Launcher Grid -->
+      <!-- Dashboard App Grid -->
       <div id="appGrid" class="grid">
         <div class="card" onclick="launchApp('https://www.youtube.com')"><span>▶️</span>YouTube</div>
         <div class="card" onclick="launchApp('https://twitch.tv')"><span>👾</span>Twitch</div>
         <div class="card" onclick="launchApp('https://play.2048.co')"><span>🎮</span>Game 2048</div>
       </div>
 
-      <!-- Remote Controlled Iframe View -->
+      <!-- Remote Stream Viewport -->
       <iframe id="activeFrame"></iframe>
     </div>
   </div>
 
   <script>
-    // Connect to a free public signaling/relay namespace
-    // Replace 'your-unique-room-name' with a custom secret key matching your phone controller
-    const ROOM_CODE = 'tesla-modelx-mcu2-alpha';
+    // Generate a random 4-digit room code (e.g. 8492)
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    const peerId = 'tesla-mcu2-' + pin;
     
-    // Using a public socket test server for zero hosting costs
-    const socket = io('https://socket-io-chatема-example.herokuapp.com' || 'https://cluster-socket.herokuapp.com', {
-      transports: ['websocket', 'polling']
+    document.getElementById('carPin').innerText = pin;
+
+    // Connect to PeerJS Free Public Server
+    const peer = new Peer(peerId);
+
+    peer.on('open', (id) => {
+      console.log('Tesla Car Peer Ready:', id);
     });
 
-    socket.on('connect', () => {
-      document.getElementById('connectionStatus').innerText = 'Connected (Ready)';
-      socket.emit('join', ROOM_CODE);
-    });
-
-    socket.on('disconnect', () => {
-      document.getElementById('connectionStatus').innerText = 'Disconnected';
-      document.getElementById('connectionStatus').style.color = '#ff3b30';
-    });
-
-    // Listen for remote commands sent from your Android phone
-    socket.on('remote-action', (action) => {
-      if (action.type === 'LOAD_URL') {
-        launchApp(action.url);
-      } else if (action.type === 'GO_HOME') {
-        closeApp();
-      }
+    peer.on('connection', (conn) => {
+      conn.on('data', (data) => {
+        if (data.type === 'LOAD_URL') {
+          launchApp(data.url);
+        } else if (data.type === 'GO_HOME') {
+          closeApp();
+        }
+      });
     });
 
     function launchApp(url) {
