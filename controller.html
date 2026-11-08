@@ -3,45 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tesla Controller</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <title>Tesla Phone Controller</title>
+  
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
   <style>
     body { background: #0f172a; color: #fff; font-family: sans-serif; padding: 20px; text-align: center; }
     h2 { margin-bottom: 20px; color: #00e5ff; }
-    .btn { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border-radius: 14px; margin: 10px 0; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+    
+    .pin-input {
+      background: #1e293b; border: 2px solid #00e5ff; color: #fff; padding: 12px;
+      font-size: 22px; font-weight: bold; border-radius: 12px; text-align: center;
+      width: 160px; margin-bottom: 12px; font-family: monospace; letter-spacing: 2px;
+    }
+
+    .btn {
+      background: #1e293b; border: 1px solid rgba(255,255,255,0.1); color: #fff;
+      padding: 16px; font-size: 16px; font-weight: bold; border-radius: 14px;
+      margin: 8px 0; width: 100%; cursor: pointer;
+    }
     .btn:active { background: #00e5ff; color: #000; }
-    .status-badge { background: #065f46; color: #34d399; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+    .status-badge { background: #991b1b; color: #f87171; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
-  <h2>Tesla Remote Controller</h2>
-  <div id="status" class="status-badge">Connecting to Car...</div>
+  <h2>Tesla Controller</h2>
+  
+  <div>
+    <input id="pinInput" class="pin-input" type="number" placeholder="PIN" maxlength="4" />
+    <br>
+    <button class="btn" style="background:#007aff; width:160px;" onclick="connectToCar()">Connect</button>
+  </div>
+  <br>
 
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://www.youtube.com')">▶️ Launch YouTube in Car</button>
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://twitch.tv')">👾 Launch Twitch in Car</button>
-  <button class="btn" onclick="sendAction('LOAD_URL', 'https://play.2048.co')">🎮 Launch Game on Screen</button>
-  <button class="btn" onclick="sendAction('GO_HOME', '')" style="background: #991b1b;">🏠 Return to Dashboard Grid</button>
+  <div id="status" class="status-badge">Not Connected</div>
+
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://www.youtube.com')">▶️ Launch YouTube</button>
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://twitch.tv')">👾 Launch Twitch</button>
+  <button class="btn" onclick="sendAction('LOAD_URL', 'https://play.2048.co')">🎮 Launch Game 2048</button>
+  <button class="btn" onclick="sendAction('GO_HOME', '')" style="background: #991b1b;">🏠 Return to Home</button>
 
   <script>
-    const ROOM_CODE = 'tesla-modelx-mcu2-alpha';
-    const socket = io('https://socket-io-chatема-example.herokuapp.com' || 'https://cluster-socket.herokuapp.com', {
-      transports: ['websocket', 'polling']
-    });
+    const peer = new Peer();
+    let conn = null;
 
-    socket.on('connect', () => {
-      document.getElementById('status').innerText = 'Connected to Tesla Model X';
-      socket.emit('join', ROOM_CODE);
-    });
+    function connectToCar() {
+      const pin = document.getElementById('pinInput').value;
+      if (!pin) return alert("Enter the PIN shown on your Tesla screen");
 
-    socket.on('disconnect', () => {
-      document.getElementById('status').innerText = 'Disconnected';
-      document.getElementById('status').style.background = '#991b1b';
-      document.getElementById('status').style.color = '#f87171';
-    });
+      const targetPeerId = 'tesla-mcu2-' + pin;
+      conn = peer.connect(targetPeerId);
+
+      conn.on('open', () => {
+        const badge = document.getElementById('status');
+        badge.innerText = 'Paired with Tesla!';
+        badge.style.background = '#065f46';
+        badge.style.color = '#34d399';
+      });
+
+      conn.on('close', () => {
+        const badge = document.getElementById('status');
+        badge.innerText = 'Disconnected';
+        badge.style.background = '#991b1b';
+        badge.style.color = '#f87171';
+      });
+    }
 
     function sendAction(type, url) {
-      socket.emit('remote-action', { room: ROOM_CODE, type, url });
+      if (conn && conn.open) {
+        conn.send({ type, url });
+      } else {
+        alert("Connect using the 4-digit Tesla PIN first!");
+      }
     }
   </script>
 </body>
