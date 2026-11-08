@@ -12,7 +12,7 @@
     :root {
       --bg-dark: #07090e;
       --card-bg-95: rgba(255, 255, 255, 0.05); /* 95% Transparent Ultra-Glass */
-      --card-border: rgba(255, 255, 255, 0.15);
+      --card-border: rgba(255, 255, 255, 0.18);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
@@ -26,8 +26,8 @@
     /* HUD Header with Official Tesla Logo */
     .hud-header {
       height: 60px; padding: 0 20px; background: rgba(11, 15, 25, 0.85);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(12px); z-index: 10; position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(14px); z-index: 10; position: relative;
     }
     .brand-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
     .tesla-logo { width: 20px; height: 20px; fill: var(--cherry-red); }
@@ -40,21 +40,48 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
-    /* Vector/Asset White Model X Hero Stage with Plaid Warp Puddle Light */
+    /* Photo Realistic White Model X Hero Stage with Maxton Kit & Plaid Light */
     .car-hero-stage {
       position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background-color: #0b0e14;
-      background-image: radial-gradient(circle at center, rgba(217, 4, 41, 0.1) 0%, rgba(7, 9, 14, 0.95) 100%),
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%"><defs><radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.9"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient><linearGradient id="plaid" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23d90429"/><stop offset="33%" stop-color="%23ffffff"/><stop offset="66%" stop-color="%23000000"/><stop offset="100%" stop-color="%23d90429"/></linearGradient></defs><rect width="1000" height="600" fill="%230b0e14"/><ellipse cx="500" cy="480" rx="350" ry="80" fill="%23000" opacity="0.6"/><path d="M250,380 Q300,220 500,200 Q700,220 750,380 Z" fill="%23f8fafc" stroke="%23cbd5e1" stroke-width="4"/><polygon points="230,380 770,380 800,420 200,420" fill="%230f172a"/><polygon points="200,420 800,420 820,435 180,435" fill="%23000000"/><rect x="420" y="390" width="160" height="25" rx="4" fill="%23ffffff" stroke="%23000" stroke-width="2"/><text x="500" y="408" font-family="monospace" font-weight="900" font-size="16" fill="%23000" text-anchor="middle">R9 HOA</text><circle cx="500" cy="350" r="14" fill="%23ffffff"/><circle cx="500" cy="350" r="25" fill="url(%23glow)"/><circle cx="320" cy="365" r="18" fill="url(%23glow)"/><circle cx="680" cy="365" r="18" fill="url(%23glow)"/><g transform="translate(620, 410) rotate(-15) skewX(-30)"><polygon points="0,0 220,0 260,110 0,110" fill="url(%23plaid)" opacity="0.85" stroke="%23ffffff" stroke-width="2"/></g></svg>');
-      background-position: center 20%;
-      background-size: cover;
-      background-repeat: no-repeat;
+      background: 
+        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.2) 0%, rgba(7, 9, 14, 0.95) 85%),
+        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 25%/cover no-repeat;
     }
 
-    /* 95% Transparent Glass App Shelf overlay */
+    /* Illuminated Tesla 'T' Front Badge */
+    .badge-halo {
+      position: absolute; top: 35%; left: 37.5%; width: 14px; height: 14px; border-radius: 50%;
+      background: #ffffff; box-shadow: 0 0 18px 8px rgba(255, 255, 255, 0.95); pointer-events: none;
+    }
+
+    /* Maxton Front Splitter & Side Skirt Shadow Accent */
+    .maxton-splitter-accent {
+      position: absolute; top: 48%; left: 24%; width: 42%; height: 8px;
+      background: #000000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9); border-radius: 4px; pointer-events: none;
+    }
+
+    /* Custom R9 HOA Registration Plate Overlay */
+    .license-plate-tag {
+      position: absolute; top: 47%; left: 34%; background: #ffffff; color: #000000;
+      border: 1.5px solid #000000; padding: 1px 7px; font-family: monospace; font-size: 11px; font-weight: 900;
+      border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 1px; z-index: 3;
+    }
+
+    /* Plaid Warp-Speed Tunnel Puddle Light Projection Beam */
+    .plaid-puddle-projection {
+      position: absolute; top: 44%; left: 44%; width: 220px; height: 90px;
+      transform: skewX(-32deg) rotateX(55deg);
+      background: 
+        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
+        repeating-linear-gradient(45deg, #d90429, #d90429 4px, #ffffff 4px, #ffffff 8px, #000000 8px, #000000 12px);
+      box-shadow: 0 0 35px rgba(217, 4, 41, 0.95), inset 0 0 12px rgba(255, 255, 255, 0.9);
+      border: 2px solid #ffffff; opacity: 0.95; border-radius: 4px; pointer-events: none; z-index: 2;
+    }
+
+    /* 95% Transparent Glass App Shelf Overlay */
     .app-shelf-overlay {
       position: relative; z-index: 5; flex: 1; margin-top: 60px;
-      overflow-y: auto; padding: 240px 16px 40px 16px;
+      overflow-y: auto; padding: 250px 16px 40px 16px;
     }
 
     .app-grid {
@@ -104,10 +131,15 @@
       </div>
     </div>
 
-    <!-- Vector Background Stage (Embedded SVG rendering guarantees display on MCU2) -->
-    <div class="car-hero-stage"></div>
+    <!-- White Model X Hero Stage -->
+    <div class="car-hero-stage">
+      <div class="badge-halo"></div>
+      <div class="maxton-splitter-accent"></div>
+      <div class="license-plate-tag">R9 HOA</div>
+      <div class="plaid-puddle-projection"></div>
+    </div>
 
-    <!-- 95% Transparent Glass Grid -->
+    <!-- 95% Transparent Glass Grid Overlay -->
     <div class="app-shelf-overlay">
       <div id="appGrid" class="app-grid">
         <div class="app-card" onclick="launchApp('https://www.youtube.com')">
@@ -170,7 +202,6 @@
     });
 
     function launchApp(targetUrl) {
-      // In Motion Video Bypass: Redirect via YouTube host to break out of MCU driver block
       triggerFullscreen(targetUrl);
     }
 
