@@ -4,45 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cherry Berry Remote</title>
-
-  <!-- Industrial MQTT for Instant Cellular/Hotspot Control -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
   <style>
     :root {
       --bg-dark: #07090e;
-      --card-bg-95: rgba(255, 255, 255, 0.05); /* 95% Transparent Ultra-Glass matched to Dash */
-      --card-border: rgba(255, 255, 255, 0.15);
+      --card-bg-95: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.18);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    
-    /* Vertical Aspect Mirroring Tesla Screen */
     body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main); }
 
     .portal-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
-    /* HUD Header Bar identical to Tesla Dash */
     .hud-header {
-      height: 60px; padding: 0 16px; background: rgba(11, 15, 25, 0.85);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(12px); z-index: 10; position: relative;
+      height: 55px; padding: 0 16px; background: rgba(11, 15, 25, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(14px); z-index: 10; position: relative;
     }
-    
     .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-    .tesla-logo { width: 18px; height: 18px; fill: var(--cherry-red); }
+    .tesla-logo { width: 16px; height: 16px; fill: var(--cherry-red); }
 
     .pairing-bar { display: flex; align-items: center; gap: 8px; }
-    
     .pin-box {
       background: rgba(255, 255, 255, 0.08); border: 1.5px solid var(--cherry-red); color: #fff; padding: 4px 8px;
-      font-size: 14px; font-weight: bold; border-radius: 8px; text-align: center; width: 68px;
+      font-size: 14px; font-weight: bold; border-radius: 8px; text-align: center; width: 65px;
       font-family: monospace; outline: none;
     }
-
     .status-pill {
       background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 4px 10px; border-radius: 20px; font-family: monospace; font-size: 11px; font-weight: 700; color: var(--accent-blue);
@@ -51,8 +42,160 @@
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    /* Embedded Self-Contained SVG Hero Visual matching Tesla Dash */
+    /* Matching White Model X Photo Stage */
     .car-hero-stage {
-      position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background-color: #0b0e14;
-      background-
+      position: absolute; top: 55px; left: 0; right: 0; bottom: 0; z-index: 1;
+      background: 
+        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.2) 0%, rgba(7, 9, 14, 0.95) 85%),
+        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 25%/cover no-repeat;
+    }
+
+    .license-plate-tag {
+      position: absolute; top: 46%; left: 34%; background: #ffffff; color: #000000;
+      border: 1.5px solid #000000; padding: 1px 6px; font-family: monospace; font-size: 10px; font-weight: 900;
+      border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 1px; z-index: 3;
+    }
+
+    .plaid-puddle-projection {
+      position: absolute; top: 43%; left: 44%; width: 170px; height: 70px;
+      transform: skewX(-32deg) rotateX(55deg);
+      background: 
+        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
+        repeating-linear-gradient(45deg, #d90429, #d90429 3px, #ffffff 3px, #ffffff 6px, #000000 6px, #000000 9px);
+      box-shadow: 0 0 25px rgba(217, 4, 41, 0.95);
+      border: 1.5px solid #ffffff; opacity: 0.95; border-radius: 3px; pointer-events: none; z-index: 2;
+    }
+
+    .app-shelf-overlay {
+      position: relative; z-index: 5; flex: 1; margin-top: 55px;
+      overflow-y: auto; padding: 200px 12px 30px 12px;
+    }
+
+    .app-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; margin: 0 auto;
+    }
+
+    .app-card {
+      background: var(--card-bg-95);
+      border: 1px solid var(--card-border);
+      border-radius: 18px; height: 95px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 5px; cursor: pointer;
+      backdrop-filter: blur(16px) saturate(200%);
+      -webkit-backdrop-filter: blur(16px) saturate(200%);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .app-card:active {
+      transform: scale(0.94);
+      background: rgba(217, 4, 41, 0.4);
+      border-color: var(--cherry-red);
+    }
+
+    .app-card .icon-emoji { font-size: 26px; }
+    .app-card span.title { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+
+    .btn-action-row { grid-column: span 3; display: flex; gap: 8px; margin-top: 4px; }
+    .btn-ctrl {
+      flex: 1; padding: 12px; border-radius: 14px; font-size: 11px; font-weight: 800;
+      border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-full { background: #0284c7; }
+    .btn-home { background: var(--cherry-red); }
+  </style>
+</head>
+<body>
+
+  <div class="portal-container">
+    <div class="hud-header">
+      <div class="brand-title">
+        <svg class="tesla-logo" viewBox="0 0 342 342">
+          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
+        </svg>
+        CHERRY REMOTE
+      </div>
+
+      <div class="pairing-bar">
+        <input id="pin" class="pin-box" type="number" placeholder="PIN" maxlength="4" oninput="autoPair()" />
+        <div class="status-pill">
+          <div id="dot" class="status-dot"></div>
+          <span id="statusText">PAIR</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="car-hero-stage">
+      <div class="license-plate-tag">R9 HOA</div>
+      <div class="plaid-puddle-projection"></div>
+    </div>
+
+    <div class="app-shelf-overlay">
+      <div class="app-grid">
+        <div class="app-card" onclick="send('LAUNCH', 'https://www.youtube.com')">
+          <span class="icon-emoji">▶️</span><span class="title">YouTube</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://www.netflix.com')">
+          <span class="icon-emoji">🎬</span><span class="title">Netflix</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://www.primevideo.com')">
+          <span class="icon-emoji">📦</span><span class="title">Prime Video</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://www.disneyplus.com')">
+          <span class="icon-emoji">✨</span><span class="title">Disney+</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://www.twitch.tv')">
+          <span class="icon-emoji">👾</span><span class="title">Twitch</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://app.plex.tv')">
+          <span class="icon-emoji">🍿</span><span class="title">Plex</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://open.spotify.com')">
+          <span class="icon-emoji">🎵</span><span class="title">Spotify</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://music.apple.com')">
+          <span class="icon-emoji">🍎</span><span class="title">Apple Music</span>
+        </div>
+        <div class="app-card" onclick="send('LAUNCH', 'https://play.2048.co')">
+          <span class="icon-emoji">🎮</span><span class="title">Game 2048</span>
+        </div>
+
+        <div class="btn-action-row">
+          <button class="btn-ctrl btn-full" onclick="send('FULLSCREEN', '')">🖥️ Force Motion Video</button>
+          <button class="btn-ctrl btn-home" onclick="send('HOME', '')">🏠 Home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let client = null;
+    let topic = '';
+
+    function autoPair() {
+      const pinVal = document.getElementById('pin').value;
+      if (pinVal.length === 4) {
+        topic = 'cherry_portal_' + pinVal;
+        client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+
+        client.on('connect', () => {
+          document.getElementById('dot').classList.add('active');
+          document.getElementById('statusText').innerText = 'READY';
+        });
+
+        client.on('offline', () => {
+          document.getElementById('dot').classList.remove('active');
+          document.getElementById('statusText').innerText = 'PAIR';
+        });
+      }
+    }
+
+    function send(type, url) {
+      if (client && client.connected) {
+        client.publish(topic, JSON.stringify({ type, url }));
+      } else {
+        alert("Enter the 4-digit PIN showing on your Tesla screen first!");
+      }
+    }
+  </script>
+</body>
+</html>
