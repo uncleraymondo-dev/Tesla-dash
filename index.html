@@ -11,77 +11,97 @@
   <style>
     :root {
       --bg-light: #f4f6f9;
-      --card-bg: rgba(255, 255, 255, 0.9);
-      --card-border: rgba(0, 0, 0, 0.08);
-      --text-dark: #111827;
+      --card-bg: rgba(255, 255, 255, 0.88);
+      --card-border: rgba(255, 255, 255, 0.9);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --text-dark: #0f172a;
       --cherry-red: #d90429;
       --accent-blue: #0284c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    
+    /* Optimized specifically for Vertical Tesla 17" Screen Aspect Ratio */
     body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-light); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-dark); }
 
-    /* Model X Showcase Background with Plaid Puddle Projection */
-    .bg-showcase {
-      position: absolute; inset: 0; z-index: 1; pointer-events: none;
-      background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.6) 0%, rgba(244, 246, 249, 0.95) 100%),
-                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') left center/cover no-repeat;
-    }
+    .portal-vertical-wrapper { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
-    /* Plaid Warp Projection Beam (CSS Rendered matching image) */
-    .plaid-projection {
-      position: absolute; bottom: 18%; left: 16%; width: 220px; height: 90px;
-      transform: skewX(-35deg) rotateX(55deg);
-      background: repeating-linear-gradient(45deg, #d90429, #d90429 6px, #ffffff 6px, #ffffff 12px, #000000 12px, #000000 18px);
-      box-shadow: 0 0 25px rgba(217, 4, 41, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.9);
-      border: 2px solid #fff; opacity: 0.85; border-radius: 4px; pointer-events: none;
-    }
-
-    .app-container { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
-
-    /* Light Theme HUD Header */
+    /* HUD Header Bar */
     .hud-header {
-      height: 75px; padding: 0 32px; background: rgba(255, 255, 255, 0.9);
-      border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03); backdrop-filter: blur(12px);
+      height: 70px; padding: 0 24px; background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(12px); z-index: 10;
     }
-    .brand-title { font-size: 20px; font-weight: 800; letter-spacing: 1px; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
-    .brand-title span { color: var(--cherry-red); font-size: 24px; }
+    .brand-title { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+    .brand-title span { color: var(--cherry-red); font-size: 22px; }
 
     .status-pill {
-      background: #ffffff; border: 1px solid var(--card-border);
-      padding: 8px 18px; border-radius: 20px; font-family: monospace; font-size: 15px; font-weight: 700; color: var(--accent-blue);
-      display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      background: #ffffff; border: 1px solid rgba(0,0,0,0.1);
+      padding: 6px 14px; border-radius: 20px; font-family: monospace; font-size: 14px; font-weight: 700; color: var(--accent-blue);
+      display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
-    /* Main Viewport & Grid */
-    .main-viewport { flex: 1; padding: 24px 32px; overflow-y: auto; position: relative; }
+    /* Top 55% Hero Canvas: Custom Model X R9 HOA with Maxton Bodykit & Plaid Puddle Light */
+    .car-hero-stage {
+      height: 52%; position: relative; width: 100%; overflow: hidden;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, rgba(244, 246, 249, 1) 100%),
+                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center center/cover no-repeat;
+    }
+
+    /* Maxton Front Splitter & Badge Glow Simulation */
+    .badge-glow {
+      position: absolute; top: 48%; left: 38%; width: 14px; height: 14px; border-radius: 50%;
+      background: #ffffff; box-shadow: 0 0 15px 6px rgba(255, 255, 255, 0.95); pointer-events: none;
+    }
+
+    /* Plaid Tunnel Puddle Light Beam Projection */
+    .plaid-puddle-projection {
+      position: absolute; bottom: 12%; left: 45%; width: 230px; height: 95px;
+      transform: skewX(-32deg) rotateX(55deg);
+      background: 
+        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 22%, transparent 22%),
+        repeating-linear-gradient(45deg, #d90429, #d90429 5px, #ffffff 5px, #ffffff 10px, #000000 10px, #000000 15px);
+      box-shadow: 0 0 35px rgba(217, 4, 41, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.95);
+      border: 2px solid #ffffff; opacity: 0.92; border-radius: 4px; pointer-events: none;
+    }
+
+    /* License Plate overlay tag */
+    .license-plate-tag {
+      position: absolute; top: 58%; left: 34%; background: #ffffff; color: #000;
+      border: 1px solid #000; padding: 2px 8px; font-family: monospace; font-size: 11px; font-weight: 900;
+      border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Bottom 48% Overlay Panel with 3D Transparent Cards */
+    .app-shelf-overlay {
+      height: 48%; width: 100%; position: relative; z-index: 5;
+      background: linear-gradient(180deg, rgba(244, 246, 249, 0.4) 0%, rgba(244, 246, 249, 0.98) 30%);
+      backdrop-filter: blur(10px); padding: 16px 24px 24px 24px; overflow-y: auto;
+    }
+
     .app-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 20px; max-width: 1200px; margin: 0 0 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 900px; margin: 0 auto;
     }
 
     .app-card {
-      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
-      height: 135px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 10px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px;
+      height: 125px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: var(--card-shadow); backdrop-filter: blur(16px);
     }
-    .app-card:active { transform: scale(0.96); background: #ffffff; border-color: var(--cherry-red); }
-    .app-card .icon-emoji { font-size: 38px; }
-    .app-card span.title { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .app-card:active { transform: translateY(3px) scale(0.97); border-color: var(--cherry-red); }
+    .app-card .icon-emoji { font-size: 36px; }
+    .app-card span.title { font-size: 13px; font-weight: 700; color: var(--text-dark); }
 
-    #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; border-radius: 12px; }
+    #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; z-index: 20; position: absolute; inset: 0; }
   </style>
 </head>
 <body>
 
-  <div class="bg-showcase">
-    <div class="plaid-projection"></div>
-  </div>
-
-  <div class="app-container">
+  <div class="portal-vertical-wrapper">
+    <!-- Top Header -->
     <div class="hud-header">
       <div class="brand-title"><span>🍒</span> CHERRY BERRY MAGIC CARPET PORTAL</div>
       <div class="status-pill">
@@ -90,7 +110,15 @@
       </div>
     </div>
 
-    <div class="main-viewport">
+    <!-- Hero Model X Showcase Stage -->
+    <div class="car-hero-stage">
+      <div class="badge-glow"></div>
+      <div class="license-plate-tag">R9 HOA</div>
+      <div class="plaid-puddle-projection"></div>
+    </div>
+
+    <!-- Bottom 3D Glass App Grid -->
+    <div class="app-shelf-overlay">
       <div id="appGrid" class="app-grid">
         <div class="app-card" onclick="launchApp('https://www.youtube.com')">
           <span class="icon-emoji">▶️</span><span class="title">YouTube</span>
@@ -113,62 +141,17 @@
         <div class="app-card" onclick="launchApp('https://open.spotify.com')">
           <span class="icon-emoji">🎵</span><span class="title">Spotify</span>
         </div>
+        <div class="app-card" onclick="launchApp('https://music.apple.com')">
+          <span class="icon-emoji">🍎</span><span class="title">Apple Music</span>
+        </div>
         <div class="app-card" onclick="launchApp('https://play.2048.co')">
           <span class="icon-emoji">🎮</span><span class="title">Game 2048</span>
         </div>
       </div>
-
-      <iframe id="contentFrame"></iframe>
     </div>
+
+    <iframe id="contentFrame"></iframe>
   </div>
 
   <script>
-    // Fixed or Saved 4-Digit Local Room PIN
-    let pin = localStorage.getItem('cherry_pin') || Math.floor(1000 + Math.random() * 9000).toString();
-    localStorage.setItem('cherry_pin', pin);
-    document.getElementById('pinDisplay').innerText = pin;
-
-    // Connect to ultra-fast public MQTT broker
-    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
-    const topic = 'cherry_portal_' + pin;
-
-    client.on('connect', () => {
-      document.getElementById('dot').classList.add('active');
-      client.subscribe(topic);
-      console.log('Connected to MQTT Channel:', topic);
-    });
-
-    client.on('message', (t, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        if (data.type === 'LAUNCH') launchApp(data.url);
-        if (data.type === 'HOME') closeApp();
-        if (data.type === 'FULLSCREEN') triggerFullscreen(data.url);
-      } catch(e) {}
-    });
-
-    client.on('offline', () => {
-      document.getElementById('dot').classList.remove('active');
-    });
-
-    function launchApp(url) {
-      document.getElementById('appGrid').style.display = 'none';
-      const frame = document.getElementById('contentFrame');
-      frame.style.display = 'block';
-      frame.src = url;
-    }
-
-    function closeApp() {
-      const frame = document.getElementById('contentFrame');
-      frame.src = '';
-      frame.style.display = 'none';
-      document.getElementById('appGrid').style.display = 'grid';
-    }
-
-    function triggerFullscreen(targetUrl) {
-      const encoded = encodeURIComponent(targetUrl || window.location.href);
-      window.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
-    }
-  </script>
-</body>
-</html>
+    // Always generate a fresh 4-digit PIN on page load for reliable
