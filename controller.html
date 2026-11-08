@@ -4,82 +4,165 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cherry Berry Remote</title>
+  
+  <!-- MQTT for Instant Hotspot Remote Control -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: rgba(255, 255, 255, 0.08);
+      --bg-light: #f4f6f9;
+      --card-bg-transparent: rgba(255, 255, 255, 0.4); /* Glass Bubble matched to Dash */
+      --card-border: rgba(255, 255, 255, 0.7);
+      --card-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
+      --text-dark: #0f172a;
       --cherry-red: #d90429;
-      --text: #ffffff;
+      --accent-blue: #0284c7;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; text-align: center; }
+    body, html { width: 100%; height: 100%; overflow-x: hidden; background: #0b0d12; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-dark); }
 
-    h2 { font-weight: 800; letter-spacing: 1px; margin-bottom: 14px; color: var(--cherry-red); }
-    
+    .remote-wrapper { display: flex; flex-direction: column; min-height: 100vh; position: relative; }
+
+    /* HUD Header Matching Dash */
+    .hud-header {
+      height: 65px; padding: 0 16px; background: rgba(255, 255, 255, 0.88);
+      border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(16px); z-index: 10; position: sticky; top: 0;
+    }
+    .brand-title { font-size: 14px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+    .tesla-logo { width: 18px; height: 18px; fill: var(--cherry-red); }
+
+    /* Pin Box & Connection Status Pill */
+    .pairing-bar {
+      display: flex; align-items: center; gap: 8px;
+    }
     .pin-box {
-      background: #1e293b; border: 2px solid var(--cherry-red); color: #fff; padding: 10px;
-      font-size: 24px; font-weight: bold; border-radius: 12px; text-align: center; width: 140px;
-      font-family: monospace; letter-spacing: 4px; outline: none; margin-bottom: 10px;
+      background: #ffffff; border: 2px solid var(--cherry-red); color: #111; padding: 4px 8px;
+      font-size: 16px; font-weight: bold; border-radius: 10px; text-align: center; width: 75px;
+      font-family: monospace; letter-spacing: 2px; outline: none;
+    }
+    .status-badge {
+      background: #fee2e2; color: #991b1b; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase;
+    }
+    .status-badge.connected { background: #d1fae5; color: #065f46; }
+
+    /* Model X Showcase Background Stage */
+    .car-hero-stage {
+      position: absolute; top: 65px; left: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, rgba(244, 246, 249, 0.95) 100%),
+                  url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 20%/cover no-repeat;
     }
 
-    .status-badge { background: #7f1d1d; color: #fca5a5; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; margin-bottom: 16px; }
-    .status-badge.connected { background: #064e3b; color: #6ee7b7; }
+    /* Plaid Puddle Light Projection Beam */
+    .plaid-puddle-projection {
+      position: absolute; top: 38%; left: 35%; width: 160px; height: 65px;
+      transform: skewX(-30deg) rotateX(55deg);
+      background: 
+        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
+        repeating-linear-gradient(45deg, #d90429, #d90429 3px, #ffffff 3px, #ffffff 6px, #000000 6px, #000000 9px);
+      box-shadow: 0 0 25px rgba(217, 4, 41, 0.95);
+      border: 1.5px solid #ffffff; opacity: 0.9; border-radius: 3px; pointer-events: none;
+    }
 
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+    .license-plate-tag {
+      position: absolute; top: 40%; left: 24%; background: #ffffff; color: #000;
+      border: 1px solid #000; padding: 1px 5px; font-family: monospace; font-size: 9px; font-weight: 900;
+      border-radius: 2px;
+    }
+
+    /* Floating Glass Remote Shelf */
+    .app-shelf-overlay {
+      position: relative; z-index: 5; flex: 1; margin-top: 10px;
+      padding: 170px 16px 30px 16px;
+    }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 500px; margin: 0 auto;
+    }
     
     .btn {
-      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); color: var(--text);
-      padding: 16px 10px; font-size: 14px; font-weight: 700; border-radius: 14px; display: flex;
-      flex-direction: column; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      background: var(--card-bg-transparent);
+      border: 1px solid var(--card-border);
+      color: var(--text-dark);
+      padding: 14px 10px; font-size: 13px; font-weight: 800; border-radius: 18px; display: flex;
+      flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      box-shadow: var(--card-shadow);
+      transition: transform 0.15s ease, background 0.15s ease;
     }
-    .btn:active { background: var(--cherry-red); color: #fff; }
-    .btn-full { grid-column: span 2; background: #0284c7; color: #fff; }
-    .btn-home { grid-column: span 2; background: var(--cherry-red); color: #fff; }
+    .btn:active { transform: scale(0.95); background: rgba(217, 4, 41, 0.3); border-color: var(--cherry-red); }
+    .btn span.icon { font-size: 30px; }
+    
+    .btn-full { grid-column: span 2; background: rgba(2, 132, 199, 0.8); color: #fff; border: none; }
+    .btn-home { grid-column: span 2; background: rgba(217, 4, 41, 0.85); color: #fff; border: none; }
   </style>
 </head>
 <body>
 
-  <h2>CHERRY BERRY REMOTE</h2>
+  <div class="remote-wrapper">
+    <!-- Header Matching Dash -->
+    <div class="hud-header">
+      <div class="brand-title">
+        <svg class="tesla-logo" viewBox="0 0 342 342">
+          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
+        </svg>
+        CHERRY REMOTE
+      </div>
 
-  <input id="pin" class="pin-box" type="number" placeholder="PIN" maxlength="4" />
-  <br>
-  <button class="btn btn-full" style="padding:10px;" onclick="connectRemote()">Connect Instant Remote</button>
-  <br>
-  <div id="status" class="status-badge">Offline</div>
+      <div class="pairing-bar">
+        <input id="pin" class="pin-box" type="number" placeholder="PIN" maxlength="4" oninput="autoPair()" />
+        <div id="status" class="status-badge">OFFLINE</div>
+      </div>
+    </div>
 
-  <div class="grid">
-    <div class="btn" onclick="send('LAUNCH', 'https://www.youtube.com')"><span>▶️</span>YouTube</div>
-    <div class="btn" onclick="send('LAUNCH', 'https://www.netflix.com')"><span>🎬</span>Netflix</div>
-    <div class="btn" onclick="send('LAUNCH', 'https://www.primevideo.com')"><span>📦</span>Prime Video</div>
-    <div class="btn" onclick="send('LAUNCH', 'https://www.disneyplus.com')"><span>✨</span>Disney+</div>
-    <div class="btn" onclick="send('LAUNCH', 'https://www.twitch.tv')"><span>👾</span>Twitch</div>
-    <div class="btn" onclick="send('LAUNCH', 'https://open.spotify.com')"><span>🎵</span>Spotify</div>
-    
-    <div class="btn btn-full" onclick="send('FULLSCREEN', '')">🖥️ Expand Fullscreen</div>
-    <div class="btn btn-home" onclick="send('HOME', '')">🏠 Return to Portal Home</div>
+    <!-- Background Stage (Model X Hero) -->
+    <div class="car-hero-stage">
+      <div class="license-plate-tag">R9 HOA</div>
+      <div class="plaid-puddle-projection"></div>
+    </div>
+
+    <!-- Glass Remote Launcher Overlay -->
+    <div class="app-shelf-overlay">
+      <div class="grid">
+        <div class="btn" onclick="send('LAUNCH', 'https://www.youtube.com')"><span class="icon">▶️</span>YouTube</div>
+        <div class="btn" onclick="send('LAUNCH', 'https://www.netflix.com')"><span class="icon">🎬</span>Netflix</div>
+        <div class="btn" onclick="send('LAUNCH', 'https://www.primevideo.com')"><span class="icon">📦</span>Prime Video</div>
+        <div class="btn" onclick="send('LAUNCH', 'https://www.disneyplus.com')"><span class="icon">✨</span>Disney+</div>
+        <div class="btn" onclick="send('LAUNCH', 'https://www.twitch.tv')"><span class="icon">👾</span>Twitch</div>
+        <div class="btn" onclick="send('LAUNCH', 'https://open.spotify.com')"><span class="icon">🎵</span>Spotify</div>
+        
+        <div class="btn btn-full" onclick="send('FULLSCREEN', '')">🖥️ Expand Fullscreen Mode</div>
+        <div class="btn btn-home" onclick="send('HOME', '')">🏠 Return to Portal Grid</div>
+      </div>
+    </div>
   </div>
 
   <script>
     let client = null;
     let topic = '';
 
-    function connectRemote() {
+    function autoPair() {
       const pinVal = document.getElementById('pin').value;
-      if (!pinVal) return alert("Enter the 4-digit PIN showing on your screen");
+      if (pinVal.length === 4) {
+        connectRemote(pinVal);
+      }
+    }
 
+    function connectRemote(pinVal) {
       topic = 'cherry_portal_' + pinVal;
       client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
 
       client.on('connect', () => {
         const badge = document.getElementById('status');
-        badge.innerText = 'Paired & Ready!';
+        badge.innerText = 'ONLINE';
         badge.classList.add('connected');
       });
 
       client.on('offline', () => {
         const badge = document.getElementById('status');
-        badge.innerText = 'Disconnected';
+        badge.innerText = 'OFFLINE';
         badge.classList.remove('connected');
       });
     }
@@ -88,7 +171,7 @@
       if (client && client.connected) {
         client.publish(topic, JSON.stringify({ type, url }));
       } else {
-        alert("Enter the PIN and tap Connect Instant Remote first!");
+        alert("Enter the 4-digit PIN showing on your Tesla screen first!");
       }
     }
   </script>
