@@ -9,7 +9,7 @@
     :root {
       --bg-dark: #07090e;
       --card-bg-95: rgba(255, 255, 255, 0.05);
-      --card-border: rgba(255, 255, 255, 0.18);
+      --card-border: rgba(255, 255, 255, 0.2);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
@@ -42,28 +42,9 @@
     .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    /* Matching White Model X Photo Stage */
     .car-hero-stage {
       position: absolute; top: 55px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: 
-        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.15) 0%, rgba(7, 9, 14, 0.95) 85%),
-        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 28%/cover no-repeat;
-    }
-
-    .license-plate-tag {
-      position: absolute; top: 53%; left: 32%; background: #ffffff; color: #000000;
-      border: 1.5px solid #000000; padding: 1px 6px; font-family: monospace; font-size: 10px; font-weight: 900;
-      border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 1px; z-index: 3;
-    }
-
-    .plaid-puddle-projection {
-      position: absolute; top: 47%; left: 44%; width: 170px; height: 70px;
-      transform: skewX(-32deg) rotateX(55deg);
-      background: 
-        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
-        repeating-linear-gradient(45deg, #d90429, #d90429 3px, #ffffff 3px, #ffffff 6px, #000000 6px, #000000 9px);
-      box-shadow: 0 0 25px rgba(217, 4, 41, 0.95);
-      border: 1.5px solid #ffffff; opacity: 0.95; border-radius: 3px; pointer-events: none; z-index: 2;
+      background: #07090e url('./modelx.jpg') center top/cover no-repeat;
     }
 
     .app-shelf-overlay {
@@ -124,10 +105,7 @@
       </div>
     </div>
 
-    <div class="car-hero-stage">
-      <div class="license-plate-tag">R9 HOA</div>
-      <div class="plaid-puddle-projection"></div>
-    </div>
+    <div class="car-hero-stage"></div>
 
     <div class="app-shelf-overlay">
       <div class="app-grid">
