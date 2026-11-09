@@ -3,57 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cherry Berry Magic Carpet Portal</title>
-
-  <!-- Anti-Cache Headers: Forces Tesla Browser to always load fresh assets -->
+  <title>Cherry Portal - Canvas Motion Engine</title>
+  
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
+  
+  <!-- JSMpeg WebGL Decoder Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/jsmpeg-player@1.0.0/build/jsmpeg.min.js"></script>
   <!-- Signal Broker (MQTT) -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-  
-  <!-- Adaptive Bitrate Engine (HLS.js) for 720p locking & buffer control -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
     :root {
       --bg-dark: #07090e;
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
-      --text-main: #ffffff;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main); }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: sans-serif; color: #fff; }
 
-    .portal-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
-
-    /* HUD Header Bar */
     .hud-header {
       height: 60px; padding: 0 20px; background: rgba(11, 15, 25, 0.85);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); z-index: 10; position: relative;
+      position: relative; z-index: 10;
     }
-    .brand-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-    .tesla-logo { width: 20px; height: 20px; fill: var(--cherry-red); }
-
-    .status-pill {
-      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent-blue);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
-    .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
-
-    /* Centered Model X Stage (Always locks center when swiping between half and full vertical screen) */
+    
     .car-hero-stage {
       position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      /* Dynamic Cache-Buster Parameter attached to image URL */
       background: #07090e url('./modelx.jpg?v=2026') center center / cover no-repeat;
     }
 
-    /* App Shelf Overlay */
     .app-shelf-overlay {
       position: relative; z-index: 5; flex: 1; margin-top: 60px;
       overflow-y: auto; padding: 250px 16px 40px 16px;
@@ -63,174 +41,90 @@
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 900px; margin: 0 auto;
     }
 
-    /* 100% Transparent 3D Jelly Glass Cards */
+    /* 100% Transparent 3D Jelly Cards */
     .app-card {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 22px; height: 110px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; cursor: pointer;
-      box-shadow: 
-        inset 0 1px 2px rgba(255, 255, 255, 0.4), 
-        inset 0 -2px 6px rgba(0, 0, 0, 0.5),
-        0 8px 24px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      background: transparent; border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 22px; height: 110px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -2px 6px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     }
 
-    .app-card:active {
-      transform: scale(0.95);
-      background: rgba(217, 4, 41, 0.15);
-      border-color: var(--cherry-red);
-      box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.6),
-        0 4px 12px rgba(217, 4, 41, 0.4);
-    }
-
-    .app-card .icon-emoji { font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
-    .app-card span.title { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
-
-    /* Custom Video Player Container */
-    #mediaPlayerContainer {
+    /* WebGL Canvas Stream Stage */
+    #canvasStage {
       display: none; position: absolute; inset: 0; z-index: 20; background: #000;
     }
-    #customVideoPlayer {
-      width: 100%; height: 100%; border: none; object-fit: contain;
+    #streamCanvas {
+      width: 100%; height: 100%; object-fit: contain;
     }
   </style>
 </head>
 <body>
 
-  <div class="portal-container">
-    <div class="hud-header">
-      <div class="brand-title">
-        <svg class="tesla-logo" viewBox="0 0 342 342">
-          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
-        </svg>
-        CHERRY BERRY MAGIC CARPET PORTAL
+  <div class="hud-header">
+    <div style="font-weight: 800;">CHERRY PORTAL</div>
+    <div style="font-family: monospace; color: var(--accent-blue);">PIN: <span id="pinDisplay">----</span></div>
+  </div>
+
+  <div class="car-hero-stage"></div>
+
+  <div class="app-shelf-overlay">
+    <div id="appGrid" class="app-grid">
+      <div class="app-card" onclick="launchCanvasStream('wss://YOUR_SERVER_IP:8443/video')">
+        <span style="font-size:32px;">▶️</span><span style="font-size:12px; font-weight:800;">Stream Canvas</span>
       </div>
-
-      <div class="status-pill">
-        <div id="dot" class="status-dot"></div>
-        <span>PIN: <span id="pinDisplay">----</span></span>
-      </div>
-    </div>
-
-    <!-- Background Car Stage -->
-    <div class="car-hero-stage"></div>
-
-    <!-- 100% Transparent 3D Jelly Cards -->
-    <div class="app-shelf-overlay">
-      <div id="appGrid" class="app-grid">
-        <div class="app-card" onclick="launchApp('https://www.youtube.com')">
-          <span class="icon-emoji">▶️</span><span class="title">YouTube</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.netflix.com')">
-          <span class="icon-emoji">🎬</span><span class="title">Netflix</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.primevideo.com')">
-          <span class="icon-emoji">📦</span><span class="title">Prime Video</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.disneyplus.com')">
-          <span class="icon-emoji">✨</span><span class="title">Disney+</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://www.twitch.tv')">
-          <span class="icon-emoji">👾</span><span class="title">Twitch</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://app.plex.tv')">
-          <span class="icon-emoji">🍿</span><span class="title">Plex</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://open.spotify.com')">
-          <span class="icon-emoji">🎵</span><span class="title">Spotify</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://music.apple.com')">
-          <span class="icon-emoji">🍎</span><span class="title">Apple Music</span>
-        </div>
-        <div class="app-card" onclick="launchApp('https://play.2048.co')">
-          <span class="icon-emoji">🎮</span><span class="title">Game 2048</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Active Media Player Overlay -->
-    <div id="mediaPlayerContainer">
-      <video id="customVideoPlayer" controls autoplay></video>
     </div>
   </div>
 
+  <!-- WebGL Video Destination -->
+  <div id="canvasStage">
+    <canvas id="streamCanvas"></canvas>
+    <audio id="audioStream" autoplay></audio>
+  </div>
+
   <script>
-    // Generate Random Pair Pin
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
     document.getElementById('pinDisplay').innerText = pin;
 
-    // Connect Real-Time MQTT Signaling Channel
     const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
     const topic = 'cherry_portal_' + pin;
 
-    client.on('connect', () => {
-      document.getElementById('dot').classList.add('active');
-      client.subscribe(topic);
-    });
+    client.on('connect', () => client.subscribe(topic));
 
     client.on('message', (t, message) => {
       try {
         const data = JSON.parse(message.toString());
-        if (data.type === 'LAUNCH') launchApp(data.url);
+        if (data.type === 'LAUNCH') launchCanvasStream(data.url);
         if (data.type === 'HOME') closeApp();
-        if (data.type === 'FULLSCREEN') triggerFullscreen(data.url);
       } catch(e) {}
     });
 
-    client.on('offline', () => {
-      document.getElementById('dot').classList.remove('active');
-    });
+    let jsmpegPlayer = null;
 
-    let hlsInstance = null;
+    function launchCanvasStream(wsUrl) {
+      document.getElementById('appGrid').style.display = 'none';
+      document.getElementById('canvasStage').style.display = 'block';
 
-    function launchApp(targetUrl) {
-      if (!targetUrl) return;
+      const canvas = document.getElementById('streamCanvas');
+      
+      // Initialize WebGL Canvas Decoder pipeline
+      if (jsmpegPlayer) jsmpegPlayer.destroy();
 
-      // Direct HLS (.m3u8) Stream Engine with 720p Cap & Buffer Lock
-      if (targetUrl.endsWith('.m3u8') && Hls.isSupported()) {
-        const video = document.getElementById('customVideoPlayer');
-        document.getElementById('mediaPlayerContainer').style.display = 'block';
+      jsmpegPlayer = new JSMpeg.Player(wsUrl, {
+        canvas: canvas,
+        autoplay: true,
+        audio: false, // Audio processed separately to avoid latency sync issues
+        preserveDrawingBuffer: true
+      });
 
-        if (hlsInstance) hlsInstance.destroy();
-        hlsInstance = new Hls({ maxBufferLength: 30 });
-        hlsInstance.loadSource(targetUrl);
-        hlsInstance.attachMedia(video);
-
-        hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-          // Cap maximum target resolution to 720p to prevent MCU2 lag
-          const max720pIndex = hlsInstance.levels.findIndex(level => level.height === 720);
-          if (max720pIndex !== -1) {
-            hlsInstance.autoLevelCapped = max720pIndex;
-          }
-          video.play();
-        });
-
-        // Dynamic Resolution Downgrade on Buffering Stalls
-        hlsInstance.on(Hls.Events.ERROR, function(event, data) {
-          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
-            hlsInstance.currentLevel = Math.max(0, hlsInstance.currentLevel - 1);
-          }
-        });
-      } else {
-        // Full YouTube Redirect Bypass for standard web pages
-        triggerFullscreen(targetUrl);
-      }
+      // Synchronize separate HTTP MP3 Audio pipeline
+      const audio = document.getElementById('audioStream');
+      audio.src = wsUrl.replace('wss://', 'https://').replace('/video', '/audio');
+      audio.play();
     }
 
     function closeApp() {
-      // Refresh session to wipe browser state & clear memory
       window.location.reload();
-    }
-
-    function triggerFullscreen(targetUrl) {
-      const dest = targetUrl || 'https://www.youtube.com';
-      const encoded = encodeURIComponent(dest);
-      window.top.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
     }
   </script>
 </body>
