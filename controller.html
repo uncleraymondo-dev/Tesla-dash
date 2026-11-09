@@ -8,8 +8,6 @@
   <style>
     :root {
       --bg-dark: #07090e;
-      --card-bg-95: rgba(255, 255, 255, 0.05);
-      --card-border: rgba(255, 255, 255, 0.2);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
@@ -44,7 +42,7 @@
 
     .car-hero-stage {
       position: absolute; top: 55px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: #07090e url('./modelx.jpg') center top/cover no-repeat;
+      background: #07090e url('./modelx.jpg') center center / cover no-repeat;
     }
 
     .app-shelf-overlay {
@@ -56,33 +54,42 @@
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; margin: 0 auto;
     }
 
+    /* 100% Transparent 3D Jelly Buttons for Remote */
     .app-card {
-      background: var(--card-bg-95);
-      border: 1px solid var(--card-border);
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
       border-radius: 18px; height: 95px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 5px; cursor: pointer;
-      backdrop-filter: blur(16px) saturate(200%);
-      -webkit-backdrop-filter: blur(16px) saturate(200%);
-      transition: transform 0.15s ease, background 0.15s ease;
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.4), 
+        inset 0 -2px 6px rgba(0, 0, 0, 0.5),
+        0 6px 18px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
 
     .app-card:active {
       transform: scale(0.94);
-      background: rgba(217, 4, 41, 0.4);
+      background: rgba(217, 4, 41, 0.15);
       border-color: var(--cherry-red);
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.6),
+        0 3px 8px rgba(217, 4, 41, 0.4);
     }
 
-    .app-card .icon-emoji { font-size: 26px; }
-    .app-card span.title { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+    .app-card .icon-emoji { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+    .app-card span.title { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
 
     .btn-action-row { grid-column: span 3; display: flex; gap: 8px; margin-top: 4px; }
     .btn-ctrl {
       flex: 1; padding: 12px; border-radius: 14px; font-size: 11px; font-weight: 800;
-      border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.4);
     }
-    .btn-full { background: #0284c7; }
-    .btn-home { background: var(--cherry-red); }
+    .btn-full { background: rgba(2, 132, 199, 0.4); }
+    .btn-home { background: rgba(217, 4, 41, 0.4); }
   </style>
 </head>
 <body>
