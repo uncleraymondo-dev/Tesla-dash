@@ -12,7 +12,7 @@
     :root {
       --bg-dark: #07090e;
       --card-bg-95: rgba(255, 255, 255, 0.05); /* 95% Transparent Ultra-Glass */
-      --card-border: rgba(255, 255, 255, 0.18);
+      --card-border: rgba(255, 255, 255, 0.2);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
@@ -40,30 +40,10 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
-    /* Exact Model X Photo Background with Maxton Kit & Plaid Puddle Lights */
+    /* Direct Local Repository Vertical Model X Background */
     .car-hero-stage {
       position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: 
-        radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.15) 0%, rgba(7, 9, 14, 0.95) 85%),
-        url('https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1200&auto=format&fit=crop') center 28%/cover no-repeat;
-    }
-
-    /* Custom R9 HOA Registration Plate Overlay matching reference layout */
-    .license-plate-tag {
-      position: absolute; top: 54%; left: 32%; background: #ffffff; color: #000000;
-      border: 1.5px solid #000000; padding: 1px 7px; font-family: monospace; font-size: 11px; font-weight: 900;
-      border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); letter-spacing: 1px; z-index: 3;
-    }
-
-    /* Multi-coloured Plaid Warp-Speed Tunnel Puddle Light Projection Beam */
-    .plaid-puddle-projection {
-      position: absolute; top: 48%; left: 45%; width: 210px; height: 85px;
-      transform: skewX(-32deg) rotateX(55deg);
-      background: 
-        radial-gradient(circle at center, transparent 15%, #d90429 15%, #d90429 25%, transparent 25%),
-        repeating-linear-gradient(45deg, #d90429, #d90429 4px, #ffffff 4px, #ffffff 8px, #000000 8px, #000000 12px);
-      box-shadow: 0 0 35px rgba(217, 4, 41, 0.95), inset 0 0 12px rgba(255, 255, 255, 0.9);
-      border: 2px solid #ffffff; opacity: 0.95; border-radius: 4px; pointer-events: none; z-index: 2;
+      background: #07090e url('./modelx.jpg') center top/cover no-repeat;
     }
 
     /* 95% Transparent Glass App Shelf Overlay */
@@ -117,11 +97,10 @@
       </div>
     </div>
 
-    <div class="car-hero-stage">
-      <div class="license-plate-tag">R9 HOA</div>
-      <div class="plaid-puddle-projection"></div>
-    </div>
+    <!-- Direct Local Vehicle Background Stage -->
+    <div class="car-hero-stage"></div>
 
+    <!-- 95% Glass App Shelf Overlay -->
     <div class="app-shelf-overlay">
       <div id="appGrid" class="app-grid">
         <div class="app-card" onclick="launchApp('https://www.youtube.com')">
