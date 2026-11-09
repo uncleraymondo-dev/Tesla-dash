@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cherry Berry Magic Carpet Portal</title>
 
-  <!-- Industrial MQTT Signal Broker -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
   <style>
     :root {
       --bg-dark: #07090e;
-      --card-bg-95: rgba(255, 255, 255, 0.05); /* 95% Transparent Ultra-Glass */
-      --card-border: rgba(255, 255, 255, 0.2);
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
       --text-main: #ffffff;
@@ -23,7 +20,6 @@
 
     .portal-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
-    /* HUD Header with Official Tesla Logo */
     .hud-header {
       height: 60px; padding: 0 20px; background: rgba(11, 15, 25, 0.85);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
@@ -40,42 +36,50 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
     .status-dot.active { background: #10b981; box-shadow: 0 0 10px #10b981; }
 
-    /* Direct Local Repository Vertical Model X Background */
+    /* Centered Car Stage (Adapts instantly to half-screen or full-screen expansion) */
     .car-hero-stage {
       position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: #07090e url('./modelx.jpg') center top/cover no-repeat;
+      background: #07090e url('./modelx.jpg') center center / cover no-repeat;
     }
 
-    /* 95% Transparent Glass App Shelf Overlay */
+    /* App Shelf Overlay */
     .app-shelf-overlay {
       position: relative; z-index: 5; flex: 1; margin-top: 60px;
       overflow-y: auto; padding: 250px 16px 40px 16px;
     }
 
     .app-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 900px; margin: 0 auto;
     }
 
-    /* 95% Glass Bubbles */
+    /* 100% Transparent 3D Jelly Icon Cards */
     .app-card {
-      background: var(--card-bg-95);
-      border: 1px solid var(--card-border);
-      border-radius: 20px; height: 110px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 22px; height: 110px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 6px; cursor: pointer;
-      backdrop-filter: blur(16px) saturate(200%);
-      -webkit-backdrop-filter: blur(16px) saturate(200%);
-      transition: transform 0.15s ease, background 0.15s ease;
+      /* 3D Jelly Look: Soft inner glow, multi-layered shadow, crisp backdrop refraction */
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.4), 
+        inset 0 -2px 6px rgba(0, 0, 0, 0.5),
+        0 8px 24px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
 
     .app-card:active {
       transform: scale(0.95);
-      background: rgba(217, 4, 41, 0.4);
+      background: rgba(217, 4, 41, 0.15);
       border-color: var(--cherry-red);
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.6),
+        0 4px 12px rgba(217, 4, 41, 0.4);
     }
 
-    .app-card .icon-emoji { font-size: 32px; }
-    .app-card span.title { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+    .app-card .icon-emoji { font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+    .app-card span.title { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
 
     #contentFrame { width: 100%; height: 100%; border: none; display: none; background: #000; z-index: 20; position: absolute; inset: 0; }
   </style>
@@ -97,10 +101,8 @@
       </div>
     </div>
 
-    <!-- Direct Local Vehicle Background Stage -->
     <div class="car-hero-stage"></div>
 
-    <!-- 95% Glass App Shelf Overlay -->
     <div class="app-shelf-overlay">
       <div id="appGrid" class="app-grid">
         <div class="app-card" onclick="launchApp('https://www.youtube.com')">
@@ -166,15 +168,13 @@
     }
 
     function closeApp() {
-      const frame = document.getElementById('contentFrame');
-      frame.src = '';
-      frame.style.display = 'none';
-      document.getElementById('appGrid').style.display = 'grid';
+      window.location.reload();
     }
 
     function triggerFullscreen(targetUrl) {
-      const encoded = encodeURIComponent(targetUrl || 'https://www.youtube.com');
-      window.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
+      const dest = targetUrl || 'https://www.youtube.com';
+      const encoded = encodeURIComponent(dest);
+      window.top.location.href = `https://www.youtube.com/redirect?q=${encoded}`;
     }
   </script>
 </body>
