@@ -70,7 +70,8 @@
 
   <div class="app-shelf-overlay">
     <div id="appGrid" class="app-grid">
-      <div class="app-card" onclick="launchCanvasStream('wss://YOUR_SERVER_IP:8443/video')">
+      <!-- UPDATED STREAM URL TO SAMSUNG HOTSPOT DEFAULT IP -->
+      <div class="app-card" onclick="launchCanvasStream('ws://192.168.43.1:8443/video')">
         <span style="font-size:32px;">▶️</span><span style="font-size:12px; font-weight:800;">Stream Canvas</span>
       </div>
     </div>
@@ -101,6 +102,7 @@
 
     let jsmpegPlayer = null;
 
+    // DEFINITION OF LAUNCH CANVAS STREAM FUNCTION
     function launchCanvasStream(wsUrl) {
       document.getElementById('appGrid').style.display = 'none';
       document.getElementById('canvasStage').style.display = 'block';
@@ -119,7 +121,7 @@
 
       // Synchronize separate HTTP MP3 Audio pipeline
       const audio = document.getElementById('audioStream');
-      audio.src = wsUrl.replace('wss://', 'https://').replace('/video', '/audio');
+      audio.src = wsUrl.replace('ws://', 'http://').replace('wss://', 'https://').replace(':8443/video', ':8080/audio');
       audio.play();
     }
 
