@@ -3,33 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cherry Berry Remote</title>
+  <title>Cherry Remote - Canvas Controller</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
       --bg-dark: #07090e;
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
-      --text-main: #ffffff;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-main); }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: sans-serif; color: #fff; }
 
     .portal-container { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; }
 
     .hud-header {
       height: 55px; padding: 0 16px; background: rgba(11, 15, 25, 0.85);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
-      backdrop-filter: blur(14px); z-index: 10; position: relative;
+      backdrop-filter: blur(14px); z-index: 10;
     }
     .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-    .tesla-logo { width: 16px; height: 16px; fill: var(--cherry-red); }
+    
+    .ip-selector-wrapper { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: bold; }
+    .ip-dropdown {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff; padding: 3px 6px; border-radius: 6px; font-family: monospace; outline: none;
+    }
+    .ip-dropdown option { background: #0b0f19; color: #fff; }
 
     .pairing-bar { display: flex; align-items: center; gap: 8px; }
     .pin-box {
       background: rgba(255, 255, 255, 0.08); border: 1.5px solid var(--cherry-red); color: #fff; padding: 4px 8px;
-      font-size: 14px; font-weight: bold; border-radius: 8px; text-align: center; width: 65px;
+      font-size: 13px; font-weight: bold; border-radius: 8px; text-align: center; width: 60px;
       font-family: monospace; outline: none;
     }
     .status-pill {
@@ -42,44 +48,48 @@
 
     .car-hero-stage {
       position: absolute; top: 55px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: #07090e url('./modelx.jpg') center center / cover no-repeat;
+      background: #07090e url('./modelx.jpg?v=2026') center center / cover no-repeat;
     }
 
     .app-shelf-overlay {
       position: relative; z-index: 5; flex: 1; margin-top: 55px;
-      overflow-y: auto; padding: 200px 12px 30px 12px;
+      overflow-y: auto; padding: 140px 12px 30px 12px;
     }
+
+    .custom-url-box {
+      display: flex; gap: 6px; margin-bottom: 12px; width: 100%; max-width: 600px; margin: 0 auto 12px auto;
+    }
+    .url-input {
+      flex: 1; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px;
+      padding: 10px; color: #fff; font-size: 12px; outline: none; backdrop-filter: blur(4px);
+    }
+    .btn-play-custom {
+      background: var(--cherry-red); border: none; border-radius: 12px; padding: 0 16px; color: #fff;
+      font-weight: 800; cursor: pointer; font-size: 12px; transition: transform 0.1s;
+    }
+    .btn-play-custom:active { transform: scale(0.95); }
 
     .app-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 600px; margin: 0 auto;
     }
 
-    /* 100% Transparent 3D Jelly Buttons for Remote */
+    /* 100% Transparent 3D Jelly Buttons */
     .app-card {
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 18px; height: 95px;
+      background: transparent; border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 18px; height: 90px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 5px; cursor: pointer;
-      box-shadow: 
-        inset 0 1px 2px rgba(255, 255, 255, 0.4), 
-        inset 0 -2px 6px rgba(0, 0, 0, 0.5),
-        0 6px 18px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), inset 0 -2px 6px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     }
 
     .app-card:active {
-      transform: scale(0.94);
-      background: rgba(217, 4, 41, 0.15);
-      border-color: var(--cherry-red);
-      box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.6),
-        0 3px 8px rgba(217, 4, 41, 0.4);
+      transform: scale(0.94); background: rgba(217, 4, 41, 0.15); border-color: var(--cherry-red);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 3px 8px rgba(217, 4, 41, 0.4);
     }
 
-    .app-card .icon-emoji { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
+    .app-card .icon-emoji { font-size: 24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)); }
     .app-card span.title { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
 
     .btn-action-row { grid-column: span 3; display: flex; gap: 8px; margin-top: 4px; }
@@ -88,7 +98,6 @@
       border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
       box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), 0 4px 12px rgba(0,0,0,0.4);
     }
-    .btn-full { background: rgba(2, 132, 199, 0.4); }
     .btn-home { background: rgba(217, 4, 41, 0.4); }
   </style>
 </head>
@@ -96,11 +105,16 @@
 
   <div class="portal-container">
     <div class="hud-header">
-      <div class="brand-title">
-        <svg class="tesla-logo" viewBox="0 0 342 342">
-          <path d="M171 0c-2.7 0-171 21.6-171 21.6l23.5 30.7c0 0 109.8-11.7 147.5-11.7 37.7 0 147.5 11.7 147.5 11.7l23.5-30.7s-168.3-21.6-171-21.6zm0 54.1c-39.7 0-111.4 8.7-111.4 8.7l6.5 30.7c0 0 68.6-8.7 104.9-8.7 36.3 0 104.9 8.7 104.9 8.7l6.5-30.7s-71.7-8.7-111.4-8.7zm0 63.2c-15.6 0-30.5 1.5-44.4 4.1l4.4 171.7h79.9l4.4-171.7c-13.9-2.6-28.8-4.1-44.3-4.1z"/>
-        </svg>
-        CHERRY REMOTE
+      <div class="brand-title">CHERRY REMOTE</div>
+
+      <div class="ip-selector-wrapper">
+        <span>IP:</span>
+        <select id="remoteIpSelect" class="ip-dropdown">
+          <option value="192.168.43.1" selected>192.168.43.1</option>
+          <option value="192.168.50.1">192.168.50.1</option>
+          <option value="10.0.0.1">10.0.0.1</option>
+          <option value="127.0.0.1">127.0.0.1</option>
+        </select>
       </div>
 
       <div class="pairing-bar">
@@ -115,38 +129,24 @@
     <div class="car-hero-stage"></div>
 
     <div class="app-shelf-overlay">
+      <div class="custom-url-box">
+        <input id="streamUrlInput" class="url-input" type="url" placeholder="Paste direct .m3u8 or video stream URL..." />
+        <button class="btn-play-custom" onclick="sendCustomStream()">PUSH STREAM</button>
+      </div>
+
       <div class="app-grid">
-        <div class="app-card" onclick="send('LAUNCH', 'https://www.youtube.com')">
-          <span class="icon-emoji">▶️</span><span class="title">YouTube</span>
+        <div class="app-card" onclick="sendPresetStream('https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8')">
+          <span class="icon-emoji">🍿</span><span class="title">Test Stream</span>
         </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://www.netflix.com')">
-          <span class="icon-emoji">🎬</span><span class="title">Netflix</span>
+        <div class="app-card" onclick="sendPresetStream('https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4')">
+          <span class="icon-emoji">🐇</span><span class="title">Big Buck</span>
         </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://www.primevideo.com')">
-          <span class="icon-emoji">📦</span><span class="title">Prime Video</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://www.disneyplus.com')">
-          <span class="icon-emoji">✨</span><span class="title">Disney+</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://www.twitch.tv')">
-          <span class="icon-emoji">👾</span><span class="title">Twitch</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://app.plex.tv')">
-          <span class="icon-emoji">🍿</span><span class="title">Plex</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://open.spotify.com')">
-          <span class="icon-emoji">🎵</span><span class="title">Spotify</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://music.apple.com')">
-          <span class="icon-emoji">🍎</span><span class="title">Apple Music</span>
-        </div>
-        <div class="app-card" onclick="send('LAUNCH', 'https://play.2048.co')">
-          <span class="icon-emoji">🎮</span><span class="title">Game 2048</span>
+        <div class="app-card" onclick="sendPresetStream('https://cph-msl.akamaized.net/hls/live/2000341/test/master.m3u8')">
+          <span class="icon-emoji">🌐</span><span class="title">Live HLS</span>
         </div>
 
         <div class="btn-action-row">
-          <button class="btn-ctrl btn-full" onclick="send('FULLSCREEN', '')">🖥️ Force Motion Video</button>
-          <button class="btn-ctrl btn-home" onclick="send('HOME', '')">🏠 Home</button>
+          <button class="btn-ctrl btn-home" onclick="send('HOME', '')">🏠 Reset to Dashboard</button>
         </div>
       </div>
     </div>
@@ -174,9 +174,25 @@
       }
     }
 
+    function sendCustomStream() {
+      const url = document.getElementById('streamUrlInput').value;
+      if (url) {
+        send('LAUNCH', url);
+      } else {
+        alert("Please paste a valid stream URL first!");
+      }
+    }
+
+    function sendPresetStream(url) {
+      document.getElementById('streamUrlInput').value = url;
+      send('LAUNCH', url);
+    }
+
     function send(type, url) {
       if (client && client.connected) {
-        client.publish(topic, JSON.stringify({ type, url }));
+        const selectedIp = document.getElementById('remoteIpSelect').value;
+        const fullWsUrl = `ws://${selectedIp}:8443/video`;
+        client.publish(topic, JSON.stringify({ type, url: fullWsUrl }));
       } else {
         alert("Enter the 4-digit PIN showing on your Tesla screen first!");
       }
