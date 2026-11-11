@@ -2,131 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Cherry Portal - Canvas Motion Engine</title>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Portal - Tesla Dashboard</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  
-  <!-- JSMpeg WebGL Decoder Engine -->
-  <script src="https://cdn.jsdelivr.net/npm/jsmpeg-player@1.0.0/build/jsmpeg.min.js"></script>
-  <!-- Signal Broker (MQTT) -->
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/jsmpeg-player@1.0.0/jsmpeg.min.js"></script>
   <style>
     :root {
       --bg-dark: #07090e;
       --cherry-red: #d90429;
       --accent-blue: #00e5ff;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: sans-serif; color: #fff; }
 
     .hud-header {
-      height: 60px; padding: 0 20px; background: rgba(11, 15, 25, 0.85);
+      height: 55px; padding: 0 20px; background: rgba(11, 15, 25, 0.85);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between;
-      position: relative; z-index: 10;
+      backdrop-filter: blur(14px); position: absolute; top: 0; left: 0; right: 0; z-index: 100;
     }
-    
-    .car-hero-stage {
-      position: absolute; top: 60px; left: 0; right: 0; bottom: 0; z-index: 1;
-      background: #07090e url('./modelx.jpg?v=2026') center center / cover no-repeat;
+    .brand-title { font-size: 14px; font-weight: 800; letter-spacing: 1px; color: var(--cherry-red); }
+
+    .ip-selector-wrapper { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: bold; }
+    .ip-dropdown {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff; padding: 4px 8px; border-radius: 6px; font-family: monospace; outline: none; font-size: 12px;
+    }
+    .ip-dropdown option { background: #0b0f19; color: #fff; }
+
+    .pin-display {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--accent-blue);
+      padding: 4px 12px; border-radius: 20px; font-family: monospace; font-size: 13px; font-weight: bold; color: var(--accent-blue);
     }
 
-    .app-shelf-overlay {
-      position: relative; z-index: 5; flex: 1; margin-top: 60px;
-      overflow-y: auto; padding: 250px 16px 40px 16px;
+    .canvas-stage {
+      width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000;
     }
-
-    .app-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 900px; margin: 0 auto;
-    }
-
-    /* 100% Transparent 3D Jelly Cards */
-    .app-card {
-      background: transparent; border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 22px; height: 110px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 6px; cursor: pointer;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.4), inset 0 -2px 6px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.4);
-      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    }
-
-    /* WebGL Canvas Stream Stage */
-    #canvasStage {
-      display: none; position: absolute; inset: 0; z-index: 20; background: #000;
-    }
-    #streamCanvas {
-      width: 100%; height: 100%; object-fit: contain;
-    }
+    canvas { width: 100%; height: 100%; object-fit: contain; }
   </style>
 </head>
 <body>
 
   <div class="hud-header">
-    <div style="font-weight: 800;">CHERRY PORTAL</div>
-    <div style="font-family: monospace; color: var(--accent-blue);">PIN: <span id="pinDisplay">----</span></div>
-  </div>
+    <div class="brand-title">CHERRY PORTAL</div>
 
-  <div class="car-hero-stage"></div>
-
-  <div class="app-shelf-overlay">
-    <div id="appGrid" class="app-grid">
-      <!-- UPDATED STREAM URL TO SAMSUNG HOTSPOT DEFAULT IP -->
-      <div class="app-card" onclick="launchCanvasStream('ws://192.168.43.1:8443/video')">
-        <span style="font-size:32px;">▶️</span><span style="font-size:12px; font-weight:800;">Stream Canvas</span>
-      </div>
+    <div class="ip-selector-wrapper">
+      <span>SERVER IP:</span>
+      <select id="serverIpSelect" class="ip-dropdown">
+        <option value="192.168.0.107" selected>192.168.0.107 (Hotspot)</option>
+        <option value="192.168.43.1">192.168.43.1</option>
+        <option value="192.168.50.1">192.168.50.1</option>
+        <option value="10.0.0.1">10.0.0.1</option>
+        <option value="127.0.0.1">127.0.0.1</option>
+      </select>
     </div>
+
+    <div class="pin-display">PIN: <span id="pinVal">----</span></div>
   </div>
 
-  <!-- WebGL Video Destination -->
-  <div id="canvasStage">
-    <canvas id="streamCanvas"></canvas>
-    <audio id="audioStream" autoplay></audio>
+  <div class="canvas-stage">
+    <canvas id="video-canvas"></canvas>
   </div>
 
   <script>
-    const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    document.getElementById('pinDisplay').innerText = pin;
+    // Generate Random 4-digit pairing PIN
+    const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
+    document.getElementById('pinVal').innerText = generatedPin;
 
+    const topic = 'cherry_portal_' + generatedPin;
     const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
-    const topic = 'cherry_portal_' + pin;
+    let player = null;
 
-    client.on('connect', () => client.subscribe(topic));
-
-    client.on('message', (t, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        if (data.type === 'LAUNCH') launchCanvasStream(data.url);
-        if (data.type === 'HOME') closeApp();
-      } catch(e) {}
+    client.on('connect', () => {
+      client.subscribe(topic);
     });
 
-    let jsmpegPlayer = null;
+    client.on('message', (t, msg) => {
+      try {
+        const data = JSON.parse(msg.toString());
+        if (data.type === 'LAUNCH' && data.url) {
+          startStream(data.url);
+        } else if (data.type === 'HOME') {
+          if (player) player.stop();
+        }
+      } catch (e) {
+        console.error("Invalid signal payload", e);
+      }
+    });
 
-    // DEFINITION OF LAUNCH CANVAS STREAM FUNCTION
-    function launchCanvasStream(wsUrl) {
-      document.getElementById('appGrid').style.display = 'none';
-      document.getElementById('canvasStage').style.display = 'block';
-
-      const canvas = document.getElementById('streamCanvas');
-      
-      // Initialize WebGL Canvas Decoder pipeline
-      if (jsmpegPlayer) jsmpegPlayer.destroy();
-
-      jsmpegPlayer = new JSMpeg.Player(wsUrl, {
-        canvas: canvas,
-        autoplay: true,
-        audio: false, // Audio processed separately to avoid latency sync issues
-        preserveDrawingBuffer: true
-      });
-
-      // Synchronize separate HTTP MP3 Audio pipeline
-      const audio = document.getElementById('audioStream');
-      audio.src = wsUrl.replace('ws://', 'http://').replace('wss://', 'https://').replace(':8443/video', ':8080/audio');
-      audio.play();
-    }
-
-    function closeApp() {
-      window.location.reload();
+    function startStream(wsUrl) {
+      const canvas = document.getElementById('video-canvas');
+      if (player) {
+        player.destroy();
+      }
+      player = new JSMpeg.Player(wsUrl, { canvas: canvas, autoplay: true, audio: false });
     }
   </script>
 </body>
